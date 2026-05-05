@@ -105,6 +105,31 @@ WAIT STRATEGY — MANDATORY:
    Maximize Browser Window
    Sleep    3s
 
+5. EMPTY FIELD TESTS — CRITICAL:
+   Input Text ALWAYS requires exactly 2 arguments: locator AND value.
+   For empty field tests, do NOT use Input Text with empty value.
+   Instead, just click submit WITHOUT filling any fields:
+     Click Button    xpath://button[@type='submit']
+   Or to clear an existing field:
+     Clear Element Text    xpath://input[@placeholder='Username']
+   NEVER write: Input Text    xpath://...    (missing value = SYNTAX ERROR)
+
+═══════════════════════════════════════════════
+  ORANGEHRM SPECIFIC RULES
+═══════════════════════════════════════════════
+
+OrangeHRM uses a modern Vue.js frontend. Key patterns:
+- Login: inputs have placeholder='Username' and placeholder='Password'
+- Submit button: xpath://button[@type='submit']
+- Logout is HIDDEN inside a user dropdown menu:
+    1. Click Element    xpath://span[@class='oxd-userdropdown-tab']
+    2. Sleep    1s
+    3. Wait Until Element Is Visible    xpath://a[normalize-space()='Logout']    5s
+    4. Click Element    xpath://a[normalize-space()='Logout']
+- Error messages appear in: xpath://div[contains(@class,'oxd-alert')]
+  or xpath://p[contains(@class,'oxd-alert-content')]
+- "Required" validation: xpath://span[contains(@class,'oxd-input-field-error')]
+
 ═══════════════════════════════════════════════
   SCREENSHOT RULES
 ═══════════════════════════════════════════════

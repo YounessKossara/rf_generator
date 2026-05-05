@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RF Generator — OmniPlatform</title>
-    <meta name="description" content="AI-powered Robot Framework test generation and execution platform">
+    <meta name="description" content="AI-powered Robot Framework test generation and execution platform with self-healing capabilities">
     <link rel="stylesheet" href="/static/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -23,7 +23,7 @@
                 </svg>
                 <h1>RF <span>Generator</span></h1>
             </div>
-            <p class="subtitle">AI-Powered Robot Framework Test Generation — OmniPlatform</p>
+            <p class="subtitle">AI-Powered Robot Framework Test Generation — Self-Healing Agent</p>
         </header>
 
         <main>
@@ -64,6 +64,7 @@
                     <div class="pipeline-step" id="step-generate"><span class="step-num">2</span> Génération RF (LLM) <span class="step-status" id="step-generate-status"></span></div>
                     <div class="pipeline-step" id="step-validate"><span class="step-num">3</span> Validation syntaxe <span class="step-status" id="step-validate-status"></span></div>
                     <div class="pipeline-step" id="step-execute"><span class="step-num">4</span> Exécution Robot Framework <span class="step-status" id="step-execute-status"></span></div>
+                    <div class="pipeline-step" id="step-healing"><span class="step-num">5</span> 🔧 Self-Healing Agent <span class="step-status" id="step-healing-status"></span></div>
                 </div>
             </div>
 
@@ -75,8 +76,13 @@
                         <div class="metric total"><span id="metric-total">0</span> Total</div>
                         <div class="metric passed"><span id="metric-passed">0</span> Passés</div>
                         <div class="metric failed"><span id="metric-failed">0</span> Échoués</div>
+                        <div class="metric healed" id="metric-healed-wrap" style="display:none"><span id="metric-healed">0</span> Guéris</div>
                     </div>
                 </div>
+
+                <!-- Per-test details -->
+                <div id="test-details-list" class="test-details-list hidden"></div>
+
                 <div id="failed-tests-list" class="failed-tests-list hidden"></div>
                 <div class="results-actions" id="results-actions">
                     <button id="view-report-btn" class="action-btn report-btn hidden">📄 Voir Rapport HTML</button>
@@ -98,7 +104,7 @@
         </main>
 
         <footer>
-            <p>RF Generator — OmniPlatform · Powered by LLM + Robot Framework</p>
+            <p>RF Generator — OmniPlatform · Self-Healing Agent · Powered by LLM + Robot Framework</p>
         </footer>
     </div>
 

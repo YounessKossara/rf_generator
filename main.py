@@ -149,13 +149,14 @@ async def serve_ui():
 @app.post("/api/generate-rf")
 async def generate_rf(req: RFRequest):
     """
-    Full pipeline:
+    Full pipeline with self-healing:
       1. Parse markdown → structured test cases
       2. Generate RF code via LLM
       3. Validate (max 2 fix attempts)
-      4. Execute .robot file
-      5. Create Trello cards for failed tests
-      6. Return results
+      4. Execute .robot file (with self-healing for selector errors)
+      5. Create Trello cards for still-failing tests
+      6. Generate DOCX report
+      7. Return results with healing info
     """
     await update_agent_status("busy")
 
@@ -201,16 +202,32 @@ async def generate_rf(req: RFRequest):
             for err in validation["errors"]:
                 print(f"      → {err}")
 
-        # ── Step 4: Execute ──
+        # ── Step 4: Execute (with self-healing) ──
         print("🚀 Step 4: Executing Robot Framework tests...")
         test_name = f"rf_run_{int(time.time())}"
         execution_result = await execute_rf(rf_code, test_name)
         print(f"   ✅ Execution result: {execution_result['status']}")
 
-        # ── Step 5: Create Trello cards for failures ──
-        if execution_result.get("failed_tests"):
-            print("📋 Step 5: Creating Trello cards for failed tests...")
-            for failed_test in execution_result["failed_tests"]:
+        # Extract healing info
+        healing_attempts = execution_result.get("healing_attempts", {})
+        healed_tests = execution_result.get("healed_tests", [])
+        still_failing = execution_result.get("still_failing", [])
+
+        if healed_tests:
+            print(f"   🔧 Self-healed: {', '.join(healed_tests)}")
+        if still_failing:
+            print(f"   ❌ Still failing: {', '.join(still_failing)}")
+
+        # Use the potentially updated RF code (after healing)
+        robot_file = execution_result.get("robot_file")
+        if robot_file and Path(robot_file).exists():
+            rf_code = Path(robot_file).read_text(encoding="utf-8")
+
+        # ── Step 5: Create Trello cards for STILL-FAILING tests only ──
+        final_failures = execution_result.get("failed_tests", [])
+        if final_failures:
+            print("📋 Step 5: Creating Trello cards for still-failing tests...")
+            for failed_test in final_failures:
                 try:
                     create_failure_card(
                         test_id=failed_test.split(":")[0].strip() if ":" in failed_test else failed_test,
@@ -219,10 +236,10 @@ async def generate_rf(req: RFRequest):
                 except Exception as e:
                     print(f"   ⚠️  Trello card creation failed: {e}")
 
-        # ── Step 5b: Generate DOCX report ──
+        # ── Step 6: Generate DOCX report ──
         docx_path = None
         try:
-            print("📝 Step 5b: Generating DOCX report...")
+            print("📝 Step 6: Generating DOCX report...")
             docx_results = {
                 **execution_result,
                 "test_name": test_name,
@@ -242,7 +259,7 @@ async def generate_rf(req: RFRequest):
         except Exception as e:
             print(f"   ⚠️  DOCX generation failed: {e}")
 
-        # ── Step 6: Return results ──
+        # ── Step 7: Return results with healing info ──
         response = {
             "status": execution_result.get("status", "completed"),
             "test_cases_parsed": len(test_cases),
@@ -254,6 +271,12 @@ async def generate_rf(req: RFRequest):
                 "passed": execution_result.get("passed", 0),
                 "failed": execution_result.get("failed", 0),
                 "failed_tests": execution_result.get("failed_tests", []),
+                "passed_tests": execution_result.get("passed_tests", []),
+            },
+            "healing": {
+                "healing_attempts": healing_attempts,
+                "healed_tests": healed_tests,
+                "still_failing": still_failing,
             },
             "report_path": execution_result.get("report_path"),
             "log_path": execution_result.get("log_path"),

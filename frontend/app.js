@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const metricTotal = document.getElementById('metric-total');
     const metricPassed = document.getElementById('metric-passed');
     const metricFailed = document.getElementById('metric-failed');
+    const metricHealed = document.getElementById('metric-healed');
+    const metricHealedWrap = document.getElementById('metric-healed-wrap');
 
     const viewReportBtn = document.getElementById('view-report-btn');
     const downloadRobotBtn = document.getElementById('download-robot-btn');
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyCodeBtn = document.getElementById('copy-code-btn');
     const rfCodeDisplay = document.getElementById('rf-code-display');
     const failedTestsList = document.getElementById('failed-tests-list');
+    const testDetailsList = document.getElementById('test-details-list');
 
     let lastTestName = null;
 
@@ -63,12 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ── Pipeline Steps ──
-    const steps = ['parse', 'generate', 'validate', 'execute'];
+    const steps = ['parse', 'generate', 'validate', 'execute', 'healing'];
 
     function resetPipeline() {
         steps.forEach(s => {
             const el = document.getElementById(`step-${s}`);
-            el.classList.remove('active', 'done', 'error');
+            el.classList.remove('active', 'done', 'error', 'healed');
             document.getElementById(`step-${s}-status`).textContent = '';
         });
     }
@@ -86,6 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`step-${stepName}-status`).textContent = detail || '✅';
     }
 
+    function setStepHealed(stepName, detail) {
+        const el = document.getElementById(`step-${stepName}`);
+        el.classList.remove('active');
+        el.classList.add('healed');
+        document.getElementById(`step-${stepName}-status`).textContent = detail || '🔧';
+    }
+
     function setStepError(stepName, detail) {
         const el = document.getElementById(`step-${stepName}`);
         el.classList.remove('active');
@@ -93,10 +103,78 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`step-${stepName}-status`).textContent = detail || '❌';
     }
 
+    function setStepSkipped(stepName) {
+        const el = document.getElementById(`step-${stepName}`);
+        el.classList.remove('active');
+        document.getElementById(`step-${stepName}-status`).textContent = '— Skipped';
+    }
+
     // ── Escape HTML ──
     function escapeHTML(str) {
         if (!str) return '';
         return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ── Build test details with healing info ──
+    function renderTestDetails(data) {
+        const exec = data.execution || {};
+        const healing = data.healing || {};
+        const healedTests = healing.healed_tests || [];
+        const healingAttempts = healing.healing_attempts || {};
+        const stillFailing = healing.still_failing || [];
+        const passedTests = exec.passed_tests || [];
+        const failedTests = exec.failed_tests || [];
+
+        testDetailsList.innerHTML = '';
+
+        // Build a list of all test names
+        const allTests = [];
+
+        // Add passed tests
+        passedTests.forEach(name => {
+            const tcId = name.match(/TC-?\d+/i)?.[0] || name;
+            const isHealed = healedTests.includes(tcId);
+            allTests.push({ name, tcId, status: isHealed ? 'healed' : 'passed', attempts: healingAttempts[tcId] || 0 });
+        });
+
+        // Add failed tests
+        failedTests.forEach(entry => {
+            const name = entry.split(':')[0].trim();
+            const tcId = name.match(/TC-?\d+/i)?.[0] || name;
+            allTests.push({ name, tcId, status: 'failed', attempts: healingAttempts[tcId] || 0 });
+        });
+
+        if (allTests.length === 0) return;
+
+        const heading = document.createElement('h3');
+        heading.style.marginBottom = '0.75rem';
+        heading.style.fontSize = '1rem';
+        heading.textContent = '🧪 Détail par Test';
+        testDetailsList.appendChild(heading);
+
+        allTests.forEach(tc => {
+            const item = document.createElement('div');
+            item.className = `test-detail-item test-${tc.status}`;
+
+            let badge = '';
+            let icon = '';
+            if (tc.status === 'passed') {
+                icon = '✅';
+                badge = '<span class="test-badge badge-passed">PASSED</span>';
+            } else if (tc.status === 'healed') {
+                icon = '🔧';
+                badge = `<span class="test-badge badge-healed">HEALED (${tc.attempts} attempt${tc.attempts > 1 ? 's' : ''})</span>`;
+            } else {
+                icon = '❌';
+                const attText = tc.attempts > 0 ? ` (${tc.attempts} attempt${tc.attempts > 1 ? 's' : ''})` : '';
+                badge = `<span class="test-badge badge-failed">FAILED${attText}</span>`;
+            }
+
+            item.innerHTML = `${icon} ${escapeHTML(tc.name)} ${badge}`;
+            testDetailsList.appendChild(item);
+        });
+
+        testDetailsList.classList.remove('hidden');
     }
 
     // ── Run Pipeline ──
@@ -117,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(true);
         statusText.textContent = 'Pipeline en cours...';
 
-        // Animate pipeline steps with delays
+        // Animate pipeline steps
         setStepActive('parse');
 
         try {
@@ -146,23 +224,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 setStepError('validate', '⚠️ Warnings');
             }
 
+            // Execution step
+            const exec = data.execution || {};
+            const healing = data.healing || {};
+            const healedCount = (healing.healed_tests || []).length;
+            const stillFailingCount = (healing.still_failing || []).length;
+
             if (data.status === 'completed') {
-                setStepDone('execute', `✅ ${data.execution.passed}/${data.execution.total} passés`);
+                setStepDone('execute', `✅ ${exec.passed}/${exec.total} passés`);
             } else if (data.status === 'error') {
                 setStepError('execute', '❌ Erreur');
             } else {
                 setStepDone('execute', '✅ Terminé');
             }
 
-            // Update results
-            const exec = data.execution || {};
+            // Healing step
+            if (healedCount > 0 || stillFailingCount > 0) {
+                if (healedCount > 0 && stillFailingCount === 0) {
+                    setStepHealed('healing', `🔧 ${healedCount} test(s) guéri(s)`);
+                } else if (healedCount > 0) {
+                    setStepHealed('healing', `🔧 ${healedCount} guéri(s), ❌ ${stillFailingCount} échoué(s)`);
+                } else {
+                    setStepError('healing', `❌ ${stillFailingCount} non guéri(s)`);
+                }
+            } else {
+                setStepSkipped('healing');
+            }
+
+            // Update results metrics
             metricTotal.textContent = exec.total || 0;
             metricPassed.textContent = exec.passed || 0;
             metricFailed.textContent = exec.failed || 0;
 
-            // Show failed tests
+            // Show healed metric
+            if (healedCount > 0) {
+                metricHealed.textContent = healedCount;
+                metricHealedWrap.style.display = '';
+            } else {
+                metricHealedWrap.style.display = 'none';
+            }
+
+            // Render per-test details with healing info
+            renderTestDetails(data);
+
+            // Show failed tests (legacy list)
             if (exec.failed_tests && exec.failed_tests.length > 0) {
-                failedTestsList.innerHTML = '<h3 style="margin-bottom:0.5rem;color:#ef4444;">❌ Tests échoués :</h3>';
+                failedTestsList.innerHTML = '<h3 style="margin-bottom:0.5rem;color:#ef4444;">❌ Tests échoués (après healing) :</h3>';
                 exec.failed_tests.forEach(ft => {
                     const div = document.createElement('div');
                     div.className = 'failed-test-item';
@@ -206,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById(`step-${s}`);
                 if (el.classList.contains('active')) {
                     setStepError(s, '❌');
-                } else if (!el.classList.contains('done')) {
+                } else if (!el.classList.contains('done') && !el.classList.contains('healed')) {
                     el.classList.add('error');
                     document.getElementById(`step-${s}-status`).textContent = '—';
                 }
