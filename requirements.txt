@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+httpx
+langchain-groq
+langchain-openai
+python-dotenv
+pydantic
+json-repair
+requests
+python-docx
+Pillow
+robotframework
+robotframework-seleniumlibrary
