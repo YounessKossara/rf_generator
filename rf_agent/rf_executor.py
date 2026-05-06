@@ -26,6 +26,7 @@ from rf_agent.self_healer import (
     extract_base_url_from_rf_code,
     _needs_login,
     _extract_credentials_from_rf,
+    _extract_target_url,
 )
 
 MAX_HEAL_ATTEMPTS = 3
@@ -207,10 +208,13 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
                 # 2. Smart page fetch — login if TC needs post-login DOM
                 login_needed = _needs_login(tc_block)
                 username, password = _extract_credentials_from_rf(tc_block)
+                target_url = _extract_target_url(tc_block, base_url)
+                
                 print(f"🔍 [HEALER] Fetching DOM from {base_url} (login={'yes' if login_needed else 'no'})...")
                 page_html = await fetch_page_html(
                     base_url, needs_login=login_needed,
-                    username=username, password=password
+                    username=username, password=password,
+                    target_url=target_url
                 )
 
                 # 3. Ask LLM to heal

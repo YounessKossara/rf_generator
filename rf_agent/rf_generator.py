@@ -102,8 +102,11 @@ WAIT STRATEGY — MANDATORY:
    Set Selenium Implicit Wait    10
 
 4. Add after Open Browser in each test case:
-   Maximize Browser Window
+   Set Window Size    1920    1080
    Sleep    3s
+
+WINDOW RULE: NEVER use 'Maximize Browser Window'.
+ALWAYS use 'Set Window Size    1920    1080' instead.
 
 5. EMPTY FIELD TESTS — CRITICAL:
    Input Text ALWAYS requires exactly 2 arguments: locator AND value.
@@ -143,7 +146,7 @@ OrangeHRM uses a modern Vue.js frontend. Key patterns:
 You MUST add Capture Page Screenshot after:
 - After Open Browser + Sleep (initial page load):
     Open Browser    ${BASE_URL}    chrome
-    Maximize Browser Window
+    Set Window Size    1920    1080
     Set Screenshot Directory    ${SCREENSHOT_ROOT}
     Sleep    3s
     Capture Page Screenshot    TC-001_initial.png
@@ -182,7 +185,7 @@ TC-001 - Login with Valid Credentials
     [Documentation]    User is redirected to Dashboard after valid login
     Set Screenshot Directory    ${SCREENSHOT_ROOT}
     Open Browser    ${BASE_URL}    chrome
-    Maximize Browser Window
+    Set Window Size    1920    1080
     Sleep    3s
     Capture Page Screenshot    TC-001_initial.png
     Wait Until Element Is Visible    xpath://input[@placeholder='Username']    10s

@@ -84,12 +84,32 @@ def _extract_credentials_from_rf(tc_rf_code: str) -> tuple:
     return username, password
 
 
+def _extract_target_url(tc_rf_code: str, base_url: str) -> str:
+    """Extract the target page URL from Go To / Navigate To keywords in TC code."""
+    for line in tc_rf_code.split("\n"):
+        stripped = line.strip()
+        lower = stripped.lower()
+        if lower.startswith("go to") or lower.startswith("navigate to"):
+            parts = stripped.split(None, 2)
+            if len(parts) >= 3:
+                return parts[-1]
+            elif len(parts) >= 2:
+                return parts[-1]
+    # Check for My Info / PIM navigation keywords
+    lower_code = tc_rf_code.lower()
+    if "my info" in lower_code or "personal" in lower_code or "profile" in lower_code:
+        return base_url.rstrip('/') + "/web/index.php/pim/viewPersonalDetails/empNumber/7"
+    return ""
+
+
 async def fetch_page_html(url: str, needs_login: bool = False,
                           username: str = "Admin",
-                          password: str = "admin123") -> str:
+                          password: str = "admin123",
+                          target_url: str = "") -> str:
     """
     Fetch real DOM HTML using Playwright (headless Chrome).
-    If needs_login=True, performs login first to get post-login DOM.
+    If needs_login=True, performs login first.
+    If target_url is set, navigates there after login to get the correct page DOM.
     """
     if HAS_PLAYWRIGHT:
         try:
@@ -111,7 +131,14 @@ async def fetch_page_html(url: str, needs_login: bool = False,
                             if await btn.count() > 0:
                                 await btn.click()
                                 await page.wait_for_timeout(3000)
-                                print("   ✅ [HEALER] Logged in, fetching post-login DOM")
+                                print("   ✅ [HEALER] Logged in")
+                                # Navigate to target page if specified
+                                if target_url:
+                                    print(f"   🔗 [HEALER] Navigating to {target_url}")
+                                    await page.goto(target_url, timeout=15000,
+                                                    wait_until="networkidle")
+                                    await page.wait_for_timeout(2000)
+                                    print("   ✅ [HEALER] Target page loaded")
                     except Exception as login_err:
                         print(f"   ⚠️  [HEALER] Login attempt failed: {login_err}")
 
@@ -261,6 +288,10 @@ ORANGEHRM SPECIFIC RULES:
     Sleep    1s
     Wait Until Element Is Visible    xpath://a[normalize-space()='Logout']    5s
     Click Element    xpath://a[normalize-space()='Logout']
+- My Info page navigation: Click Element    xpath://span[text()='My Info']
+- Edit/Save button: xpath://button[contains(@class,'oxd-button--ghost')]
+- Save button: xpath://button[@type='submit' and contains(@class,'oxd-button--secondary')]
+- First name field: xpath://input[@name='firstName']
 - Errors: xpath://div[contains(@class,'oxd-alert')]
 - Required field errors: xpath://span[contains(@class,'oxd-input-field-error')]
 
@@ -278,6 +309,7 @@ RULES:
 - Keep Set Screenshot Directory and Capture Page Screenshot lines
 - Keep [Documentation] line
 - Add Sleep    3s after Open Browser, Sleep    2s after clicks
+- NEVER use 'Maximize Browser Window'. Use 'Set Window Size    1920    1080' instead.
 
 Return ONLY the fixed test case RF code, nothing else."""
 
