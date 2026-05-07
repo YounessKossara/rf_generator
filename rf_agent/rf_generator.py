@@ -21,6 +21,7 @@ RULES:
 - Add [Documentation] tag to each test case
 - Add proper waits after navigation: Sleep    2s or Wait Until Element Is Visible
 - Close browser at end of each test case
+- ALWAYS open browser with incognito: Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
 - Return ONLY valid Robot Framework code, no markdown, no explanations
 - Do NOT wrap the code in ```robot or ``` blocks
 - Use 4 spaces for indentation under test cases and keywords
@@ -145,7 +146,7 @@ OrangeHRM uses a modern Vue.js frontend. Key patterns:
 
 You MUST add Capture Page Screenshot after:
 - After Open Browser + Sleep (initial page load):
-    Open Browser    ${BASE_URL}    chrome
+    Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
     Set Window Size    1920    1080
     Set Screenshot Directory    ${SCREENSHOT_ROOT}
     Sleep    3s
@@ -184,7 +185,7 @@ ${SCREENSHOT_ROOT}    .
 TC-001 - Login with Valid Credentials
     [Documentation]    User is redirected to Dashboard after valid login
     Set Screenshot Directory    ${SCREENSHOT_ROOT}
-    Open Browser    ${BASE_URL}    chrome
+    Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
     Set Window Size    1920    1080
     Sleep    3s
     Capture Page Screenshot    TC-001_initial.png

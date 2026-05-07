@@ -41,10 +41,11 @@ from rf_agent.rf_validator import validate_rf_syntax, fix_rf_syntax
 from rf_agent.rf_executor import execute_rf
 from rf_agent.rf_docx_reporter import generate_rf_docx_report
 from tools.trello import create_failure_card
-
-# ── Config Mission Control ──
-MC_BASE_URL = os.getenv("MC_BASE_URL", "http://localhost:3000")
-MC_API_KEY  = os.getenv("MC_API_KEY", "")
+from mission_control import (
+    register_agent,
+    update_status,
+    heartbeat_loop
+)
 
 # ── App ──
 app = FastAPI(title="RF Generator — OmniPlatform")
@@ -59,72 +60,9 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 app.mount("/output", StaticFiles(directory="output"), name="output")
 
 
-# ══════════════════════════════════════════
-#  Mission Control Integration
-# ══════════════════════════════════════════
-
-async def register_to_mission_control():
-    try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            res = await client.post(
-                f"{MC_BASE_URL}/api/agents/register",
-                headers={"Authorization": f"Bearer {MC_API_KEY}"},
-                json={
-                    "name": "rf-generator",
-                    "role": "tester",
-                    "capabilities": [
-                        "rf-generation",
-                        "rf-execution",
-                        "test-parsing",
-                        "report-generation",
-                        "trello-integration"
-                    ],
-                    "framework": "python-fastapi"
-                }
-            )
-            print(f"✅ RF Generator registered in Mission Control (status {res.status_code})")
-    except Exception as e:
-        print(f"⚠️  Mission Control not available — running standalone. ({e})")
-
-
-async def update_agent_status(status: str):
-    try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            await client.put(
-                f"{MC_BASE_URL}/api/agents",
-                headers={"Authorization": f"Bearer {MC_API_KEY}"},
-                json={"name": "rf-generator", "status": status}
-            )
-    except Exception:
-        pass
-
-
-async def heartbeat_loop():
-    while True:
-        try:
-            async with httpx.AsyncClient(timeout=5) as client:
-                res = await client.post(
-                    f"{MC_BASE_URL}/api/agents/rf-generator/heartbeat",
-                    headers={"Authorization": f"Bearer {MC_API_KEY}"},
-                    json={
-                        "token_usage": {
-                            "model": "llama-3.3-70b-versatile",
-                            "inputTokens": 0,
-                            "outputTokens": 0
-                        }
-                    }
-                )
-                if res.status_code == 200:
-                    data = res.json()
-                    print(f"💓 Heartbeat OK")
-        except Exception:
-            pass
-        await asyncio.sleep(30)
-
-
 @app.on_event("startup")
 async def startup():
-    await register_to_mission_control()
+    await register_agent()
     asyncio.create_task(heartbeat_loop())
 
 
@@ -158,7 +96,7 @@ async def generate_rf(req: RFRequest):
       6. Generate DOCX report
       7. Return results with healing info
     """
-    await update_agent_status("busy")
+    await update_status("busy")
 
     try:
         # ── Step 1: Parse markdown ──
@@ -285,14 +223,14 @@ async def generate_rf(req: RFRequest):
             "test_name": test_name,
         }
 
-        await update_agent_status("idle")
+        await update_status("idle")
         return response
 
     except HTTPException:
-        await update_agent_status("idle")
+        await update_status("idle")
         raise
     except Exception as e:
-        await update_agent_status("idle")
+        await update_status("idle")
         print(f"❌ Pipeline error: {e}")
         import traceback
         traceback.print_exc()
