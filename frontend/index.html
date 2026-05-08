@@ -47,12 +47,29 @@
                     <input type="url" id="url-input" placeholder="https://monapp.com" value="http://localhost:8080">
                 </div>
 
+                <!-- Mode selector -->
+                <div class="mode-selector">
+                    <p class="mode-label">Choisir un mode :</p>
+                    <div class="mode-cards">
+                        <div class="mode-card" id="mode-generate-only" data-mode="generate-only">
+                            <div class="mode-card-icon">📄</div>
+                            <div class="mode-card-title">Generate Only</div>
+                            <div class="mode-card-desc">Obtenir le fichier .robot — exécuter manuellement en ligne de commande</div>
+                        </div>
+                        <div class="mode-card" id="mode-generate-execute" data-mode="generate-execute">
+                            <div class="mode-card-icon">🚀</div>
+                            <div class="mode-card-title">Generate &amp; Execute</div>
+                            <div class="mode-card-desc">Générer puis exécuter automatiquement avec le Self-Healing Agent</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="action-row">
-                    <button id="run-btn" class="run-btn">
-                        <span class="btn-text">▶ Générer et Exécuter les Tests</span>
+                    <button id="run-btn" class="run-btn" disabled>
+                        <span class="btn-text">⚙️ Générer</span>
                         <span class="spinner hidden"></span>
                     </button>
-                    <span id="agent-status" class="agent-status">Prêt.</span>
+                    <span id="agent-status" class="agent-status">Choisir un mode pour commencer.</span>
                 </div>
             </div>
 
@@ -61,10 +78,36 @@
                 <h2>⚙️ Pipeline</h2>
                 <div class="pipeline-steps" id="pipeline-steps">
                     <div class="pipeline-step" id="step-parse"><span class="step-num">1</span> Parsing du Markdown <span class="step-status" id="step-parse-status"></span></div>
-                    <div class="pipeline-step" id="step-generate"><span class="step-num">2</span> Génération RF (LLM) <span class="step-status" id="step-generate-status"></span></div>
+                    <div class="pipeline-step" id="step-generate"><span class="step-num">2</span> Génération RF (Batch Mode) <span class="step-status" id="step-generate-status"></span></div>
                     <div class="pipeline-step" id="step-validate"><span class="step-num">3</span> Validation syntaxe <span class="step-status" id="step-validate-status"></span></div>
                     <div class="pipeline-step" id="step-execute"><span class="step-num">4</span> Exécution Robot Framework <span class="step-status" id="step-execute-status"></span></div>
                     <div class="pipeline-step" id="step-healing"><span class="step-num">5</span>  Self-Healing Agent <span class="step-status" id="step-healing-status"></span></div>
+                </div>
+            </div>
+
+            <!-- RF Code (Editable) -->
+            <div class="glass-panel code-section hidden" id="code-panel">
+                <div class="code-header">
+                    <h2>🤖 Code Robot Framework généré</h2>
+                    <div class="code-header-actions">
+                        <button id="download-gen-robot-btn" class="copy-btn hidden">⬇ Télécharger .robot</button>
+                        <button id="copy-code-btn" class="copy-btn">📋 Copier</button>
+                    </div>
+                </div>
+                <div class="code-container">
+                    <textarea id="rf-code-display" class="code-editor" spellcheck="false"></textarea>
+                </div>
+                <!-- Cmdline hint — visible in Generate Only mode -->
+                <div id="cmdline-hint" class="cmdline-hint hidden">
+                    <p class="cmdline-hint-title">▶ Lancer manuellement dans le terminal :</p>
+                    <pre id="cmdline-hint-code"></pre>
+                </div>
+
+                <div class="execute-action-row" id="execute-action-row">
+                    <button id="execute-btn" class="execute-btn">
+                        <span class="exec-btn-text">▶ Exécuter le Code</span>
+                        <span class="exec-spinner hidden"></span>
+                    </button>
                 </div>
             </div>
 
@@ -88,17 +131,6 @@
                     <button id="view-report-btn" class="action-btn report-btn hidden">📄 Voir Rapport HTML</button>
                     <button id="download-robot-btn" class="action-btn download-btn hidden">⬇ Télécharger .robot</button>
                     <button id="download-docx-btn" class="action-btn docx-btn hidden">⬇ Télécharger Rapport DOCX</button>
-                </div>
-            </div>
-
-            <!-- RF Code -->
-            <div class="glass-panel code-section hidden" id="code-panel">
-                <div class="code-header">
-                    <h2>🤖 Code Robot Framework généré</h2>
-                    <button id="copy-code-btn" class="copy-btn">📋 Copier</button>
-                </div>
-                <div class="code-container">
-                    <pre><code id="rf-code-display"></code></pre>
                 </div>
             </div>
         </main>

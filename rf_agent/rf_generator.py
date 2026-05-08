@@ -2,339 +2,452 @@
 RF Generator — Robot Framework Code Generator
 
 Uses LLM to generate Robot Framework (.robot) code from parsed test cases.
-Includes optional page reconnaissance to provide real DOM context to the LLM.
+Performs per-domain app reconnaissance to discover login selectors, then caches
+in app_memory.json for reuse across runs. No hardcoded app-specific rules.
+
+Architecture:
+  - Settings / Variables / Keywords sections are built in Python from app_memory.
+    The LLM never writes login selectors — it only writes test case bodies.
+  - All test cases call the pre-built `Open App And Login` keyword.
+  - This eliminates locator drift across batches permanently.
 """
 
+import re as _re
 import httpx
 from tools.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
+from rf_agent.app_memory import (load_app, save_app, discover_login_recipe,
+                                  build_login_context, discover_page_structure)
 
 
-SYSTEM_PROMPT = """You are an expert in Robot Framework and SeleniumLibrary.
-Generate valid Robot Framework test code.
+# ── System prompt — focuses on test case BODIES only ──────────────────────────
+
+BASE_SYSTEM_PROMPT = """You are an expert in Robot Framework and SeleniumLibrary.
+You are generating individual test case bodies — NOT full .robot files.
+The *** Settings ***, *** Variables ***, and *** Keywords *** sections are
+already built. Generate ONLY test case content.
 
 RULES:
-- Always start with *** Settings ***, *** Variables ***, *** Test Cases ***
-- Use SeleniumLibrary keywords: Open Browser, Input Text, Click Button, Click Element,
-  Wait Until Page Contains, Wait Until Element Is Visible, Close Browser
-- Use ${BASE_URL} variable for all URLs
+- Do NOT output any *** ... *** section headers
+- Do NOT output Open Browser, Set Window Size, or Set Screenshot Directory — the keyword handles these
+- Do NOT write the login sequence — call Open App And Login instead
+- Use SeleniumLibrary keywords: Input Text, Click Element, Wait Until Page Contains,
+  Wait Until Element Is Visible, Get Text, Get Element Count
+- Use ${BASE_URL} for URLs
 - Add [Documentation] tag to each test case
-- Add proper waits after navigation: Sleep    2s or Wait Until Element Is Visible
-- Close browser at end of each test case
-- ALWAYS open browser with incognito: Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
-- Return ONLY valid Robot Framework code, no markdown, no explanations
-- Do NOT wrap the code in ```robot or ``` blocks
-- Use 4 spaces for indentation under test cases and keywords
+- Return ONLY valid Robot Framework test case code, no markdown, no explanations
+- Use 4 spaces for indentation under test cases
 - Each keyword call must be on its own line with proper indentation
 
 ═══════════════════════════════════════════════
-  XPATH SELECTOR RULES — CRITICAL — READ CAREFULLY
+  KEYWORD USAGE — MANDATORY
 ═══════════════════════════════════════════════
 
-NEVER USE @name SELECTORS. Modern web apps (Angular, React, Vue, OrangeHRM, etc.)
-do NOT use name attributes on inputs. Using @name WILL FAIL.
+Two keywords are pre-built. Choose the right one:
 
-BANNED — DO NOT USE THESE:
-  ✗ xpath://input[@name='txtUsername']        ← WILL FAIL
-  ✗ xpath://input[@name='txtPassword']        ← WILL FAIL
-  ✗ xpath://input[@name='Submit']             ← WILL FAIL
-  ✗ xpath://input[@id='btnSave']              ← WILL FAIL
-  ✗ xpath://a[@id='welcome']                  ← WILL FAIL
-  ✗ xpath://a[@href='/index.php/auth/logout'] ← WILL FAIL
+  Open App And Login    <username>    <password>
+    → Use for ALL tests including login-failure and locked-user tests.
+      The keyword enters the credentials and clicks submit regardless.
+      The test body then checks what happened (error message, redirect, etc.)
 
-MANDATORY SELECTOR PRIORITY (use in this order):
-  1. @placeholder   → xpath://input[@placeholder='Username']
-  2. @type          → xpath://input[@type='password']
-  3. text content   → xpath://button[normalize-space()='Login']
-  4. CSS class      → css:button.oxd-button--main
-  5. contains text  → xpath://*[contains(text(),'Dashboard')]
+  Open Browser Only
+    → Use ONLY for access-control tests that navigate WITHOUT entering
+      any credentials at all (e.g. go directly to /cart.html and verify
+      the app redirects to login). This is NOT for login-error tests.
 
-CORRECT SELECTORS — USE THESE:
-  ✓ xpath://input[@placeholder='Username']
-  ✓ xpath://input[@placeholder='Password']
-  ✓ xpath://button[@type='submit']
-  ✓ xpath://button[normalize-space()='Login']
-  ✓ xpath://button[normalize-space()=' Login ']
-  ✓ css:input[placeholder='Username']
-  ✓ css:button[type='submit']
+Do NOT write Close Browser — Test Teardown handles it automatically.
 
-FOR COMMON ACTIONS:
-  Login form:
-    Wait Until Element Is Visible    xpath://input[@placeholder='Username']    10s
-    Input Text    xpath://input[@placeholder='Username']    Admin
-    Input Text    xpath://input[@placeholder='Password']    admin123
-    Click Button    xpath://button[@type='submit']
+═══════════════════════════════════════════════
+  SELECTOR DERIVATION — MANDATORY
+═══════════════════════════════════════════════
 
-  Logout (modern apps use dropdown menus):
-    Click Element    css:.oxd-userdropdown-tab
-    OR Click Element    xpath://*[contains(@class,'userdropdown')]
-    Wait Until Element Is Visible    xpath://a[normalize-space()='Logout']    5s
-    Click Element    xpath://a[normalize-space()='Logout']
+The real page HTML is provided in the user message.
+You MUST derive ALL selectors from that HTML — do not guess or invent them.
 
-  Navigation links:
-    Click Element    xpath://a[normalize-space()='My Info']
-    OR Click Element    xpath://span[normalize-space()='My Info']
+General priority for selectors:
+  1. @id                  → xpath://button[@id='submit-btn']
+  2. @placeholder         → xpath://input[@placeholder='Email']
+  3. @type                → xpath://input[@type='password']
+  4. button/link text     → xpath://button[normalize-space()='Add to Cart']
+  5. aria-label           → xpath://*[@aria-label='Close menu']
+  6. exact @class         → xpath://div[@class='product-card']  (for counting)
+  7. contains(@class)     → xpath://div[contains(@class,'card')]  (for clicking one)
+
+For COUNTING: always use EXACT @class to avoid counting nested child elements.
+For FINDING/CLICKING: contains(@class,...) or text() is more robust.
+
+NEVER use @name attributes.
+NEVER invent a selector — verify it exists in the provided HTML.
+
+═══════════════════════════════════════════════
+  XPATH SELECTOR RULES
+═══════════════════════════════════════════════
+
+NEVER USE @name SELECTORS. Priority order:
+  1. @id or @placeholder   → xpath://input[@placeholder='First Name']
+  2. @type                 → xpath://input[@type='password']
+  3. text content          → xpath://button[normalize-space()='Add to cart']
+  4. CSS class             → css:.some-class-name
+  5. contains text         → xpath://*[contains(text(),'Dashboard')]
+
+CLASS SELECTORS:
+  For FINDING/CLICKING one element: use contains to be robust:
+    xpath://div[contains(@class,'item')]
+  For COUNTING elements: use EXACT class to avoid over-matching:
+    xpath://div[@class='item']
+  NEVER use contains(@class,...) for counting — it matches child divs too
+
+AFTER LOGOUT:
+  Wait for the login input to appear, not text "Login":
+    Wait Until Element Is Visible    xpath://input[@placeholder='Username']    15s
 
 WAIT STRATEGY — MANDATORY:
-  Before EVERY interaction with an element, add a wait:
-    Wait Until Element Is Visible    <locator>    10s
-  This prevents "element not found" errors on slow-loading pages.
-
-  Example:
-    Wait Until Element Is Visible    xpath://input[@placeholder='Username']    10s
-    Input Text    xpath://input[@placeholder='Username']    Admin
-
-═══════════════════════════════════════════════
-  SYNTAX RULES — MANDATORY
-═══════════════════════════════════════════════
-
-1. Variables section format MUST be:
-   ${BASE_URL}    https://example.com
-   NO equal sign. Just spaces between name and value.
-
-2. *** Settings *** section accepts ONLY:
-   Library, Resource, Suite Setup, Suite Teardown,
-   Test Setup, Test Teardown, Metadata, Variables
-
-   NEVER put keywords like 'Set Selenium Speed'
-   in Settings section.
-
-3. If you need Selenium speed, add in each test case:
-   Set Selenium Implicit Wait    10
-
-4. Add after Open Browser in each test case:
-   Set Window Size    1920    1080
-   Sleep    3s
-
-WINDOW RULE: NEVER use 'Maximize Browser Window'.
-ALWAYS use 'Set Window Size    1920    1080' instead.
-
-5. EMPTY FIELD TESTS — CRITICAL:
-   Input Text ALWAYS requires exactly 2 arguments: locator AND value.
-   For empty field tests, do NOT use Input Text with empty value.
-   Instead, just click submit WITHOUT filling any fields:
-     Click Button    xpath://button[@type='submit']
-   Or to clear an existing field:
-     Clear Element Text    xpath://input[@placeholder='Username']
-   NEVER write: Input Text    xpath://...    (missing value = SYNTAX ERROR)
-
-═══════════════════════════════════════════════
-  ORANGEHRM SPECIFIC RULES
-═══════════════════════════════════════════════
-
-OrangeHRM uses a modern Vue.js frontend. Key patterns:
-- Login: inputs have placeholder='Username' and placeholder='Password'
-- Submit button: xpath://button[@type='submit']
-- Logout is HIDDEN inside a user dropdown menu:
-    1. Click Element    xpath://span[@class='oxd-userdropdown-tab']
-    2. Sleep    1s
-    3. Wait Until Element Is Visible    xpath://a[normalize-space()='Logout']    5s
-    4. Click Element    xpath://a[normalize-space()='Logout']
-- Error messages appear in: xpath://div[contains(@class,'oxd-alert')]
-  or xpath://p[contains(@class,'oxd-alert-content')]
-- "Required" validation: xpath://span[contains(@class,'oxd-input-field-error')]
+  Before EVERY interaction: Wait Until Element Is Visible    <locator>    15s
 
 ═══════════════════════════════════════════════
   SCREENSHOT RULES
 ═══════════════════════════════════════════════
 
-- At the START of each test case, add:
-    Set Screenshot Directory    ${SCREENSHOT_ROOT}
-
-- After each significant action, capture a screenshot:
-    Capture Page Screenshot    {tc_id}_step_{n}.png
-
-You MUST add Capture Page Screenshot after:
-- After Open Browser + Sleep (initial page load):
-    Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
-    Set Window Size    1920    1080
-    Set Screenshot Directory    ${SCREENSHOT_ROOT}
-    Sleep    3s
-    Capture Page Screenshot    TC-001_initial.png
-
-- After successful login or page navigation:
-    Wait Until Page Contains    Dashboard    10s
-    Capture Page Screenshot    TC-001_after_login.png
-
-- After any form submission:
-    Click Button    xpath://button[@type='submit']
-    Sleep    2s
-    Capture Page Screenshot    TC-001_after_submit.png
-
-- Before Close Browser (final state):
-    Capture Page Screenshot    TC-001_final.png
-    Close Browser
-
-Use the test case ID as prefix for screenshot filenames.
-
-IMPORTANT: Always declare ${SCREENSHOT_ROOT} in *** Variables *** with a default:
-${SCREENSHOT_ROOT}    .
+The keyword captures _initial.png and _after_login.png automatically.
+In the test body use the TC ID as prefix: TC-006_final.png
 
 ═══════════════════════════════════════════════
-  COMPLETE EXAMPLE (for reference)
+  COMMON MISTAKES — DO NOT REPEAT
 ═══════════════════════════════════════════════
 
-*** Settings ***
-Library    SeleniumLibrary
+NEVER REPEAT LOGIN:
+  After Open App And Login, the user IS already logged in.
+  Do NOT write Input Text for username/password or click the submit button again.
+  If a user account loads slowly, just increase the wait time for the landing page.
 
-*** Variables ***
-${BASE_URL}    https://opensource-demo.orangehrmlive.com
-${SCREENSHOT_ROOT}    .
+UNDEFINED VARIABLES:
+  NEVER use any variable not assigned earlier in the same test case.
+  Always assign before use:
+    ${count}=    Get Element Count    <locator>
+    Should Be Equal As Integers    ${count}    6
 
-*** Test Cases ***
-TC-001 - Login with Valid Credentials
-    [Documentation]    User is redirected to Dashboard after valid login
-    Set Screenshot Directory    ${SCREENSHOT_ROOT}
-    Open Browser    ${BASE_URL}    chrome    options=add_argument("--incognito");add_argument("--disable-popup-blocking")
-    Set Window Size    1920    1080
-    Sleep    3s
-    Capture Page Screenshot    TC-001_initial.png
-    Wait Until Element Is Visible    xpath://input[@placeholder='Username']    10s
-    Input Text    xpath://input[@placeholder='Username']    Admin
-    Input Text    xpath://input[@placeholder='Password']    admin123
-    Capture Page Screenshot    TC-001_step_1.png
-    Click Button    xpath://button[@type='submit']
-    Sleep    2s
-    Wait Until Page Contains    Dashboard    10s
-    Capture Page Screenshot    TC-001_after_login.png
-    Capture Page Screenshot    TC-001_final.png
-    Close Browser"""
+SIDE MENU / BURGER MENU:
+  After clicking a menu toggle, wait for a menu ITEM to be visible, not a CSS class:
+    Wait Until Element Is Visible    xpath://a[normalize-space()='All Items']    15s
+  NEVER wait for CSS classes that describe menu animation state.
 
+RESET / CLEAR STATE:
+  After a reset action, verify the app returned to initial state.
+  Look at the HTML to understand what appears after reset (typically add-to-cart buttons).
+  Do NOT expect a cart badge after clearing the cart.
+
+EXTERNAL NAVIGATION:
+  When a link navigates to an external domain, verify the URL changed:
+    Wait Until Location Contains    expected-domain.com    15s
+  NEVER use Wait Until Page Contains for external page content.
+
+PAGE CONTAINS vs ELEMENT VISIBLE:
+  Wait Until Page Contains works for VISIBLE page text only.
+  For elements with placeholder attributes, use Element Is Visible:
+    Wait Until Element Is Visible    xpath://input[@placeholder='Username']    15s
+
+MULTI-STEP FLOWS:
+  Read the test description carefully. Some features require navigating
+  through multiple pages to reach the target (the button may not exist yet).
+  Common patterns derived from the PAGE HTML context:
+    - To reach a checkout form: add item to cart → navigate to cart → click checkout
+    - To remove an item: navigate to cart first, then click remove
+    - To reset/clear state: open the side menu first, then click the reset option
+  Use the PAGE HTML to verify which buttons exist on the CURRENT page.
+  NEVER wait for a button that only appears on a later page without navigating there first.
+
+SYNTAX:
+  NEVER write Input Text with only one argument — it requires locator AND value.
+  For empty field tests, skip Input Text and click submit directly.
+  NEVER use Maximize Browser Window — Set Window Size is already called."""
+
+
+# ── Python-built file header (Settings + Variables + Keywords) ─────────────────
+
+def _build_header(base_url: str, recipe: dict) -> str:
+    """
+    Build the Settings, Variables, and Keywords sections from app_memory.
+    Selectors come directly from the recipe — the LLM never touches them.
+    """
+    usr = recipe.get("username_selector") or "xpath://input[@placeholder='Username']"
+    pwd = recipe.get("password_selector") or "xpath://input[@type='password']"
+    btn = recipe.get("submit_selector")   or "xpath://*[@type='submit']"
+    success = recipe.get("success_indicator", "")
+    success_wait = f"    Wait Until Page Contains    {success}    15s\n" if success else ""
+
+    return (
+        "*** Settings ***\n"
+        "Library    SeleniumLibrary\n"
+        "Test Teardown    Run Keyword And Ignore Error    Close All Browsers\n"
+        "\n"
+        "*** Variables ***\n"
+        f"${{BASE_URL}}    {base_url}\n"
+        "${SCREENSHOT_ROOT}    output/screenshots\n"
+        "\n"
+        "*** Keywords ***\n"
+        "Open App And Login\n"
+        "    [Arguments]    ${username}    ${password}\n"
+        "    ${_safe}=    Evaluate    ''.join('_' if c in r'<>:\"/\\|?*()' else c for c in \"\"\"${TEST NAME}\"\"\")\n"
+        "    Open Browser    ${BASE_URL}    chrome    "
+        "options=add_argument(\"--incognito\");add_argument(\"--disable-popup-blocking\")\n"
+        "    Set Window Size    1920    1080\n"
+        "    Set Screenshot Directory    ${SCREENSHOT_ROOT}\n"
+        "    Sleep    3s\n"
+        "    Capture Page Screenshot    ${_safe}_initial.png\n"
+        f"    Wait Until Element Is Visible    {usr}    15s\n"
+        f"    Input Text    {usr}    ${{username}}\n"
+        f"    Wait Until Element Is Visible    {pwd}    15s\n"
+        f"    Input Text    {pwd}    ${{password}}\n"
+        f"    Wait Until Element Is Visible    {btn}    15s\n"
+        f"    Click Element    {btn}\n"
+        "    Sleep    2s\n"
+        f"{success_wait}"
+        "    Capture Page Screenshot    ${_safe}_after_login.png\n"
+        "\n"
+        "Open Browser Only\n"
+        "    Open Browser    ${BASE_URL}    chrome    "
+        "options=add_argument(\"--incognito\");add_argument(\"--disable-popup-blocking\")\n"
+        "    Set Window Size    1920    1080\n"
+        "    Set Screenshot Directory    ${SCREENSHOT_ROOT}\n"
+        "\n"
+        "*** Test Cases ***"
+    )
+
+
+# ── Batch output cleanup ───────────────────────────────────────────────────────
+
+def _clean_batch_code(code: str) -> str:
+    """
+    Strip section headers, spurious column-0 [Tag] lines, and markdown separators
+    from LLM batch output. Applied to all batches since the header is built by Python.
+    Also normalizes accidental indentation of TC-NNN lines back to column 0.
+    """
+    lines = code.split("\n")
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        # Remove *** ... *** section headers
+        if stripped.startswith("***") and stripped.endswith("***"):
+            continue
+        # Remove any [Tag] at column 0 (not indented = not inside a test body)
+        if stripped.startswith("[") and not line.startswith(" ") and not line.startswith("\t"):
+            continue
+        # Remove markdown-style "--- TC-XXX ---" separators
+        if stripped.startswith("---") and stripped.endswith("---"):
+            continue
+        # Remove LLM prose preambles at column 0 ending in ':' (e.g. "Here are the test cases:")
+        if (stripped.endswith(":")
+                and not line.startswith(" ")
+                and not line.startswith("\t")
+                and not stripped.startswith("TC-")):
+            continue
+        # Normalize TC-NNN test case names to column 0 — LLM sometimes indents them
+        if _re.match(r'TC-\d+', stripped) and (line.startswith(" ") or line.startswith("\t")):
+            line = stripped
+        cleaned.append(line)
+    return "\n".join(cleaned)
+
+
+# ── Credential extractor ──────────────────────────────────────────────────────
+
+def _extract_default_credentials(test_cases: list[dict]) -> tuple[str, str]:
+    """
+    Scan test case steps/titles for the first valid (non-error) credential pair.
+    Returns (username, password) or ("", "") if none found.
+    """
+    for tc in test_cases:
+        text = tc.get("title", "") + " " + tc.get("expected", "")
+        for step in tc.get("steps", []):
+            text += " " + (step.get("action", "") if isinstance(step, dict) else str(step))
+
+        for pattern in [
+            # "user / pass" with at least one space around slash
+            r'\b([\w.@+-]{3,})\s+/\s+([\w.@+-]{4,})\b',
+            # "user/pass" no spaces but minimum length
+            r'\b([\w.@+-]{3,})\s*/\s*([\w.@+-]{5,})\b',
+            # "username: xxx password: yyy" (English or French)
+            r'(?:username|user|email|login|identifiant)\s*[=:]\s*(\S{3,}).*?(?:password|pass(?:word)?|pwd|mot\s*de\s*passe)\s*[=:]\s*(\S{4,})',
+            # "word_user ... longword" — requires password ≥6 chars to avoid French articles
+            r'\b(\w+_user)\b[^.\n]{0,80}?\b(\w{6,})\b',
+        ]:
+            m = _re.search(pattern, text, _re.IGNORECASE | _re.DOTALL)
+            if m:
+                u, p = m.group(1), m.group(2)
+                if not any(x in u.lower() for x in ["locked", "invalid", "wrong", "bad"]) and u != p:
+                    print(f"   👤 [CREDS] Found credentials: {u}")
+                    return u, p
+    print("   ⚠️  [CREDS] No credentials found in test cases")
+    return "", ""
+
+
+# ── HTML fetcher ───────────────────────────────────────────────────────────────
 
 def _fetch_page_html(url: str) -> str:
-    """
-    Fetch the login/landing page HTML to give the LLM real DOM context.
-    Returns a truncated version focusing on form elements.
-    """
+    """Fetch login page HTML, returning elements relevant to form discovery."""
     try:
         with httpx.Client(timeout=10, follow_redirects=True, verify=False) as client:
             resp = client.get(url)
             html = resp.text
 
-            # Extract relevant parts: forms, inputs, buttons, links
-            import re
-            # Get all input, button, a, select, textarea tags
-            elements = re.findall(
-                r'<(?:input|button|a|select|textarea|form|label|div[^>]*class="[^"]*(?:login|form|nav|menu|dropdown|sidebar)[^"]*")[^>]*(?:/>|>[^<]*</(?:input|button|a|select|textarea|form|label|div)>|>)',
-                html,
-                re.IGNORECASE | re.DOTALL
-            )
-
-            if elements:
-                relevant_html = "\n".join(elements[:60])  # Cap at 60 elements
-                return relevant_html[:4000]  # Cap at 4000 chars
-            else:
-                # Return a chunk of the page
-                return html[:3000]
+        elements = _re.findall(
+            r'<(?:input|button|a|select|textarea|form|label|div[^>]*class="[^"]*'
+            r'(?:login|form|nav|menu|dropdown|sidebar)[^"]*")[^>]*'
+            r'(?:/>|>[^<]*</(?:input|button|a|select|textarea|form|label|div)>|>)',
+            html,
+            _re.IGNORECASE | _re.DOTALL,
+        )
+        if elements:
+            return "\n".join(elements[:60])[:4000]
+        return html[:3000]
     except Exception as e:
-        print(f"   ⚠️  Could not fetch page HTML for recon: {e}")
+        print(f"   ⚠️  Could not fetch page HTML: {e}")
         return ""
 
 
+# ── Main generator ─────────────────────────────────────────────────────────────
+
 def generate_rf_code(test_cases: list[dict], base_url: str) -> str:
     """
-    Build a prompt that includes ALL test cases at once and ask the LLM
-    to generate a complete .robot file.
+    Generate Robot Framework code in batches.
 
-    Performs page reconnaissance first to provide real DOM context.
-
-    Args:
-        test_cases: List of parsed test case dicts from md_parser.
-        base_url: The base URL of the application under test.
-
-    Returns:
-        The generated .robot code as a string.
+    Flow:
+      1. Load or discover login recipe from app_memory.
+      2. Build Settings + Variables + Keywords in Python (no LLM involvement).
+      3. Ask LLM to generate ONLY test case bodies, calling Open App And Login.
+      4. Clean each batch output to strip stray headers/separators.
+      5. Concatenate header + cleaned batches.
     """
-    # Step 0: Fetch real page HTML for selector accuracy
-    print("   🔍 Fetching page HTML for selector reconnaissance...")
-    page_html = _fetch_page_html(base_url)
-    recon_context = ""
-    if page_html:
-        recon_context = f"""
+    # ── Step 1: Recipe ─────────────────────────────────────────────────────────
+    print("   📚 Checking app memory...")
+    stored = load_app(base_url)
+    # Use whatever is stored (even with null selectors — _build_header has fallbacks)
+    recipe = stored if stored else {}
 
-═══════════════════════════════════════════════
-  REAL PAGE HTML (from {base_url})
-═══════════════════════════════════════════════
-Below is the ACTUAL HTML from the target page. Use these REAL elements
-to build your XPath/CSS selectors. Do NOT guess — use what you see here:
-
-{page_html}
-
-Use the EXACT attributes you see above (placeholder, type, class, text content).
-DO NOT invent selectors. If you see placeholder='Username', use that.
-"""
-        print(f"   ✅ Got {len(page_html)} chars of page HTML for context")
+    if not recipe:
+        print("   🔍 Fetching login page HTML to discover recipe...")
+        login_page_html = _fetch_page_html(base_url)
+        if login_page_html:
+            recipe = discover_login_recipe(login_page_html, base_url)
+            if recipe:
+                save_app(base_url, recipe)
+        else:
+            print("   ⚠️  Could not fetch HTML — using generic selectors.")
     else:
-        print("   ⚠️  No page HTML available, using generic selectors")
+        print(f"   📖 [MEMORY] Cached recipe for {base_url} ({recipe.get('app_type', 'unknown')})")
 
-    # Format test cases into structured text for the prompt
-    tc_text_parts = []
-    for tc in test_cases:
-        part = f"--- Test Case: {tc['id']} ---\n"
-        part += f"Title: {tc['title']}\n"
+    # ── Step 1b: Post-login page structure for selector derivation ─────────────
+    page_html = stored.get("page_structure", "")
+    if not page_html:
+        # Always attempt discovery — _build_header fallbacks handle null recipe selectors
+        username, password = _extract_default_credentials(test_cases)
+        if username:
+            page_html = discover_page_structure(base_url, recipe, username, password)
+        else:
+            print("   ⚠️  Could not extract credentials — no HTML context for selector derivation.")
 
-        if tc.get("preconditions"):
-            part += "Preconditions:\n"
-            for pre in tc["preconditions"]:
-                part += f"  - {pre}\n"
+    # ── Step 2: Build the file header in Python ────────────────────────────────
+    header = _build_header(base_url, recipe)
 
-        if tc.get("steps"):
-            part += "Steps:\n"
-            for i, step in enumerate(tc["steps"], 1):
-                if isinstance(step, dict):
-                    # Table-format step with sub-expected
-                    part += f"  {i}. {step['action']}"
-                    if step.get("expected"):
-                        part += f"  → Expected: {step['expected']}"
-                    part += "\n"
-                else:
-                    part += f"  {i}. {step}\n"
+    # Build a compact keyword-usage hint for the LLM prompts
+    _usr = recipe.get("username_selector", "xpath://input[@placeholder='Username']")
+    _pwd = recipe.get("password_selector", "xpath://input[@type='password']")
+    _btn = recipe.get("submit_selector",   "xpath://*[@type='submit']")
+    login_hint = (
+        f"Two keywords are pre-built:\n"
+        f"\n"
+        f"  Open App And Login    <username>    <password>\n"
+        f"    Opens browser (incognito), sets window size, logs in using:\n"
+        f"      username field : {_usr}\n"
+        f"      password field : {_pwd}\n"
+        f"      submit button  : {_btn}\n"
+        f"    Takes _initial.png and _after_login.png screenshots automatically.\n"
+        f"    Use this for ALL tests that require the user to be logged in.\n"
+        f"\n"
+        f"  Open Browser Only\n"
+        f"    Opens browser (incognito), sets window size — does NOT log in.\n"
+        f"    Use ONLY for tests that verify unauthenticated/access-control behavior.\n"
+        f"\n"
+        f"  Do NOT open browser, set window size, or write login steps manually."
+    )
 
-        if tc.get("expected"):
-            part += f"Expected Result: {tc['expected']}\n"
+    # ── Step 3: Batch generation ───────────────────────────────────────────────
+    batch_size = 5
+    batches = [test_cases[i:i + batch_size] for i in range(0, len(test_cases), batch_size)]
+    all_test_bodies = ""
 
-        tc_text_parts.append(part)
+    for idx, batch in enumerate(batches):
+        print(f"   🤖 Generating batch {idx + 1}/{len(batches)} ({len(batch)} tests)...")
 
-    all_tcs_text = "\n".join(tc_text_parts)
+        tc_text_parts = []
+        for tc in batch:
+            part = f"ID: {tc['id']} | Title: {tc['title']}\n"
+            if tc.get("steps"):
+                part += "Steps:\n"
+                for i, step in enumerate(tc["steps"], 1):
+                    if isinstance(step, dict):
+                        part += f"  {i}. {step['action']} → {step.get('expected', '')}\n"
+                    else:
+                        part += f"  {i}. {step}\n"
+            if tc.get("expected"):
+                part += f"Expected result: {tc['expected']}\n"
+            tc_text_parts.append(part)
 
-    human_prompt = f"""Generate a complete Robot Framework test file for the following test cases.
+        batch_tcs_text = "\n".join(tc_text_parts)
 
-Base URL: {base_url}
-{recon_context}
-Test Cases:
-{all_tcs_text}
+        html_context_block = ""
+        if page_html:
+            html_context_block = f"""
+PAGE HTML (real DOM from {base_url} after login — derive ALL selectors from this):
+{page_html[:4500]}
 
-CRITICAL INSTRUCTIONS:
-- Generate ONE *** Settings *** section at the top with Library SeleniumLibrary
-- Add a *** Variables *** section with ${{BASE_URL}}    {base_url}  (NO equal sign, use spaces)
-- Add ${{SCREENSHOT_ROOT}}    .  in Variables section
-- Generate one Robot Framework test case for each TC above
-- Use the TC id and title as the test case name (e.g., "TC-001 - Login with Valid Credentials")
-- Each test case must open a browser, perform the steps, verify the expected result, and close the browser
-- Use appropriate SeleniumLibrary keywords for each step
-- Add [Documentation] to each test case with the expected result
-- IMPORTANT: Add Capture Page Screenshot after each significant action
-- MANDATORY: Use Wait Until Element Is Visible before EVERY Input Text and Click action
-- NEVER use @name selectors. Use @placeholder, @type, normalize-space(), or CSS class selectors
-- If page HTML was provided above, use the EXACT attributes from that HTML
-- Return ONLY the .robot code, nothing else"""
+MANDATORY: Use ONLY selectors that exist in the HTML above.
+Look at @id, @class, @placeholder, button text, link text, aria-label in the HTML.
+NEVER invent a selector that is not present in this HTML.
+"""
 
-    messages = [
-        SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=human_prompt),
-    ]
+        human_prompt = f"""Generate Robot Framework test case bodies for the *** Test Cases *** section.
 
-    response = invoke_with_retry(get_smart_llm, messages)
-    rf_code = response.content.strip()
+{login_hint}
+{html_context_block}
+Test cases to generate:
+{batch_tcs_text}
 
-    # Clean up: remove markdown code fences if LLM wrapped them
-    if rf_code.startswith("```"):
-        lines = rf_code.split("\n")
-        # Remove first line (```robot or ```)
-        lines = lines[1:]
-        # Remove last line if it's ```
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        rf_code = "\n".join(lines)
+MANDATORY RULES:
+- Do NOT output any *** ... *** section headers.
+- Do NOT output [Documentation] or any [Tag] at column 0 (they belong INSIDE test cases, indented).
+- Start each test case with its ID and title at column 0, e.g.:
+    TC-006 Sort Products By Price
+        [Documentation]    ...
+        Open App And Login    standard_user    secret_sauce
+        ...
+        Capture Page Screenshot    TC-006_final.png
+- Start every test with Open App And Login UNLESS the test checks unauthenticated access,
+  in which case use Open Browser Only instead.
+- Do NOT write Open Browser, Set Window Size, or login input steps — they are in the keyword.
+- Do NOT write Close Browser — Test Teardown handles it automatically.
+- Use Wait Until Element Is Visible (15s) before every element interaction.
+- Derive selectors from the PAGE HTML provided above — never guess.
+- Take screenshots for test-specific actions with the TC ID prefix (e.g. TC-006_final.png).
+- Return ONLY the test case code, no markdown fences, no explanations."""
 
-    return rf_code
+        messages = [
+            SystemMessage(content=BASE_SYSTEM_PROMPT),
+            HumanMessage(content=human_prompt),
+        ]
+
+        response = invoke_with_retry(get_smart_llm, messages)
+        batch_code = response.content.strip()
+
+        # Strip markdown fences
+        if batch_code.startswith("```"):
+            batch_code = "\n".join(batch_code.split("\n")[1:])
+            if batch_code.endswith("```"):
+                batch_code = batch_code.rsplit("```", 1)[0]
+
+        # Strip stray section headers, column-0 tags, separators
+        batch_code = _clean_batch_code(batch_code)
+
+        all_test_bodies += "\n" + batch_code.strip() + "\n"
+
+    # ── Step 4: Assemble final file ────────────────────────────────────────────
+    return header + "\n" + all_test_bodies.strip()

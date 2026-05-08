@@ -54,6 +54,7 @@ app = FastAPI(title="RF Generator — OmniPlatform")
 os.makedirs("frontend", exist_ok=True)
 os.makedirs("output/robot_files", exist_ok=True)
 os.makedirs("output/rf_reports", exist_ok=True)
+os.makedirs("output/screenshots", exist_ok=True)
 
 # ── Static files ──
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
@@ -70,9 +71,19 @@ async def startup():
 #  Request / Response Models
 # ══════════════════════════════════════════
 
+# ══════════════════════════════════════════
+#  Request / Response Models
+# ══════════════════════════════════════════
+
 class RFRequest(BaseModel):
     markdown_content: str
     base_url: str = "http://localhost:8080"
+
+class ExecuteRequest(BaseModel):
+    rf_code: str
+    base_url: str
+    test_cases: list = []  # Metadata for reports
+    test_name: str = ""    # Optional predefined name
 
 
 # ══════════════════════════════════════════
@@ -85,107 +96,92 @@ async def serve_ui():
 
 
 @app.post("/api/generate-rf")
-async def generate_rf(req: RFRequest):
+async def generate_rf_endpoint(req: RFRequest):
     """
-    Full pipeline with self-healing:
-      1. Parse markdown → structured test cases
-      2. Generate RF code via LLM
-      3. Validate (max 2 fix attempts)
-      4. Execute .robot file (with self-healing for selector errors)
-      5. Create Trello cards for still-failing tests
-      6. Generate DOCX report
-      7. Return results with healing info
+    Step 1: Parse markdown and generate RF code via LLM.
+    Returns the code for review/editing.
     """
     await update_status("busy")
-
     try:
-        # ── Step 1: Parse markdown ──
-        print("📝 Step 1: Parsing markdown...")
+        # 1. Parse markdown
+        print("📝 Parsing markdown...")
         test_cases = parse_md(req.markdown_content)
-
         if not test_cases:
-            raise HTTPException(
-                status_code=400,
-                detail="No test cases found in the markdown content. "
-                       "Make sure your TCs use the format: TC001 - Title"
-            )
+            raise HTTPException(status_code=400, detail="No test cases found.")
 
-        print(f"   ✅ Found {len(test_cases)} test case(s)")
-        for tc in test_cases:
-            print(f"      → {tc['id']}: {tc['title']}")
-
-        # ── Step 2: Generate RF code ──
-        print("🤖 Step 2: Generating Robot Framework code via LLM...")
+        # 2. Generate RF code
+        print("🤖 Generating Robot Framework code via LLM (Batch Mode)...")
         rf_code = generate_rf_code(test_cases, req.base_url)
-        print(f"   ✅ Generated {len(rf_code)} characters of RF code")
 
-        # ── Step 3: Validate (max 2 fix attempts) ──
-        print("🔍 Step 3: Validating RF syntax...")
+        # 3. Save to output directory
+        test_name = f"rf_gen_{int(time.time())}"
+        robot_dir = Path("output/robot_files")
+        robot_dir.mkdir(parents=True, exist_ok=True)
+        robot_path = robot_dir / f"{test_name}.robot"
+        robot_path.write_text(rf_code, encoding="utf-8")
+        print(f"📄 Generated code saved to: {robot_path}")
+
+        # 4. Validate
+        print("🔍 Validating RF syntax...")
         validation = validate_rf_syntax(rf_code)
-        fix_attempts = 0
 
-        while not validation["valid"] and fix_attempts < 2:
-            fix_attempts += 1
-            print(f"   ⚠️  Validation failed ({len(validation['errors'])} errors). Fix attempt {fix_attempts}/2...")
-            for err in validation["errors"]:
-                print(f"      → {err}")
+        await update_status("idle")
+        return {
+            "test_cases_parsed": len(test_cases),
+            "test_cases": test_cases,
+            "rf_code": rf_code,
+            "validation": validation,
+            "base_url": req.base_url,
+            "test_name": test_name,
+            "robot_file": str(robot_path)
+        }
+    except Exception as e:
+        await update_status("idle")
+        print(f"❌ Generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-            rf_code = fix_rf_syntax(rf_code, validation["errors"])
-            validation = validate_rf_syntax(rf_code)
 
-        if validation["valid"]:
-            print("   ✅ RF syntax is valid!")
-        else:
-            print("   ⚠️  RF code still has issues after 2 fix attempts, proceeding anyway...")
-            for err in validation["errors"]:
-                print(f"      → {err}")
-
-        # ── Step 4: Execute (with self-healing) ──
-        print("🚀 Step 4: Executing Robot Framework tests...")
-        test_name = f"rf_run_{int(time.time())}"
+@app.post("/api/execute-rf")
+async def execute_rf_endpoint(req: ExecuteRequest):
+    """
+    Step 2: Execute existing Robot Framework code with self-healing.
+    """
+    await update_status("busy")
+    try:
+        rf_code = req.rf_code
+        test_name = req.test_name or f"rf_run_{int(time.time())}"
+        
+        # 1. Execute (with self-healing)
+        print(f"🚀 Executing Robot Framework tests: {test_name}")
         execution_result = await execute_rf(rf_code, test_name)
-        print(f"   ✅ Execution result: {execution_result['status']}")
-
-        # Extract healing info
-        healing_attempts = execution_result.get("healing_attempts", {})
-        healed_tests = execution_result.get("healed_tests", [])
-        still_failing = execution_result.get("still_failing", [])
-
-        if healed_tests:
-            print(f"   🔧 Self-healed: {', '.join(healed_tests)}")
-        if still_failing:
-            print(f"   ❌ Still failing: {', '.join(still_failing)}")
-
-        # Use the potentially updated RF code (after healing)
+        
+        # Use potentially updated code after healing
+        final_rf_code = rf_code
         robot_file = execution_result.get("robot_file")
         if robot_file and Path(robot_file).exists():
-            rf_code = Path(robot_file).read_text(encoding="utf-8")
+            final_rf_code = Path(robot_file).read_text(encoding="utf-8")
 
-        # ── Step 5: Create Trello cards for STILL-FAILING tests only ──
+        # 2. Trello cards for still-failing
         final_failures = execution_result.get("failed_tests", [])
         if final_failures:
-            print("📋 Step 5: Creating Trello cards for still-failing tests...")
+            print("📋 Creating Trello cards for still-failing tests...")
             for failed_test in final_failures:
                 try:
                     create_failure_card(
                         test_id=failed_test.split(":")[0].strip() if ":" in failed_test else failed_test,
                         error_details=failed_test,
                     )
-                except Exception as e:
-                    print(f"   ⚠️  Trello card creation failed: {e}")
+                except Exception: pass
 
-        # ── Step 6: Generate DOCX report ──
+        # 3. DOCX report
         docx_path = None
         try:
-            print("📝 Step 6: Generating DOCX report...")
-            docx_results = {
-                **execution_result,
-                "test_name": test_name,
-            }
+            print("📝 Generating DOCX report...")
+            docx_results = {**execution_result, "test_name": test_name}
             docx_bytes = generate_rf_docx_report(
                 results=docx_results,
-                rf_code=rf_code,
-                test_cases=test_cases,
+                rf_code=final_rf_code,
+                test_cases=req.test_cases,
                 base_url=req.base_url,
             )
             safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in test_name)
@@ -193,17 +189,12 @@ async def generate_rf(req: RFRequest):
             docx_file.parent.mkdir(parents=True, exist_ok=True)
             docx_file.write_bytes(docx_bytes)
             docx_path = str(docx_file)
-            print(f"   ✅ DOCX report saved: {docx_path}")
         except Exception as e:
-            print(f"   ⚠️  DOCX generation failed: {e}")
+            print(f"⚠️ DOCX failed: {e}")
 
-        # ── Step 7: Return results with healing info ──
-        response = {
+        await update_status("idle")
+        return {
             "status": execution_result.get("status", "completed"),
-            "test_cases_parsed": len(test_cases),
-            "test_cases": test_cases,
-            "rf_code": rf_code,
-            "validation": validation,
             "execution": {
                 "total": execution_result.get("total", 0),
                 "passed": execution_result.get("passed", 0),
@@ -212,29 +203,45 @@ async def generate_rf(req: RFRequest):
                 "passed_tests": execution_result.get("passed_tests", []),
             },
             "healing": {
-                "healing_attempts": healing_attempts,
-                "healed_tests": healed_tests,
-                "still_failing": still_failing,
+                "healing_attempts": execution_result.get("healing_attempts", {}),
+                "healed_tests": execution_result.get("healed_tests", []),
+                "still_failing": execution_result.get("still_failing", []),
             },
             "report_path": execution_result.get("report_path"),
             "log_path": execution_result.get("log_path"),
             "robot_file": execution_result.get("robot_file"),
             "docx_path": docx_path,
             "test_name": test_name,
+            "rf_code": final_rf_code
         }
-
-        await update_status("idle")
-        return response
-
-    except HTTPException:
-        await update_status("idle")
-        raise
     except Exception as e:
         await update_status("idle")
-        print(f"❌ Pipeline error: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"❌ Execution error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ══════════════════════════════════════════
+#  Mission Control Autonomous Handoff Logic
+# ══════════════════════════════════════════
+
+async def generate_rf(req: RFRequest):
+    """
+    Compatibility wrapper for autonomous handoff (mission_control.py).
+    Executes the full pipeline in one shot.
+    """
+    # 1. Generate
+    gen_data = await generate_rf_endpoint(req)
+    
+    # 2. Execute
+    exec_req = ExecuteRequest(
+        rf_code=gen_data["rf_code"],
+        base_url=gen_data["base_url"],
+        test_cases=gen_data["test_cases"]
+    )
+    exec_data = await execute_rf_endpoint(exec_req)
+    
+    # Merge results
+    return {**gen_data, **exec_data}
 
 
 @app.get("/api/report/{test_name}")

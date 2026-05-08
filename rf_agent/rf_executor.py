@@ -6,7 +6,6 @@ When tests fail with selector errors, automatically triggers
 the self-healing agent to fix and re-execute failed tests.
 """
 
-import os
 import subprocess
 import re
 from pathlib import Path
@@ -28,6 +27,7 @@ from rf_agent.self_healer import (
     _extract_credentials_from_rf,
     _extract_target_url,
 )
+from rf_agent.app_memory import load_app
 
 MAX_HEAL_ATTEMPTS = 3
 
@@ -170,6 +170,10 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
     still_failing = []
     current_rf_code = rf_code
 
+    # Extract base_url from the .robot file and load the stored app recipe
+    base_url = extract_base_url_from_rf_code(current_rf_code)
+    app_recipe = load_app(base_url) if base_url else {}
+
     # Separate healable vs non-healable failures
     healable_failures = [ft for ft in results["failed_tests"] if is_healable_error(ft)]
     non_healable_failures = [ft for ft in results["failed_tests"] if not is_healable_error(ft)]
@@ -182,8 +186,6 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
         print(f"  🔧 SELF-HEALING AGENT ACTIVATED")
         print(f"  {len(healable_failures)} healable failure(s) detected")
         print(f"{'═' * 50}\n")
-
-        base_url = extract_base_url_from_rf_code(current_rf_code)
 
         for failure in healable_failures:
             tc_name = extract_tc_name_from_error(failure)
@@ -206,15 +208,16 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
                     break
 
                 # 2. Smart page fetch — login if TC needs post-login DOM
-                login_needed = _needs_login(tc_block)
+                login_needed = _needs_login(tc_block, app_recipe.get("success_indicator", ""))
                 username, password = _extract_credentials_from_rf(tc_block)
-                target_url = _extract_target_url(tc_block, base_url)
-                
+                target_url = _extract_target_url(tc_block)
+
                 print(f"🔍 [HEALER] Fetching DOM from {base_url} (login={'yes' if login_needed else 'no'})...")
                 page_html = await fetch_page_html(
                     base_url, needs_login=login_needed,
                     username=username, password=password,
-                    target_url=target_url
+                    target_url=target_url,
+                    login_recipe=app_recipe
                 )
 
                 # 3. Ask LLM to heal
@@ -225,6 +228,7 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
                     page_html=page_html,
                     base_url=base_url,
                     attempt=attempt,
+                    app_recipe=app_recipe,
                 )
 
                 # 4. Replace TC in .robot file

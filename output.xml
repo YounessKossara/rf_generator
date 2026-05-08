@@ -1,0 +1,3300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.14.3 on win32)" generated="2026-05-07T17:10:11.285012" rpa="false" schemaversion="5">
+<suite id="s1" name="Rf Gen 1778168134" source="C:\Users\youne\Downloads\rf_generator\output\robot_files\rf_gen_1778168134.robot">
+<kw name="Open SauceDemo Browser" type="SETUP">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-05-07T17:10:11.468140" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x00000180DA3481A0&gt;</msg>
+<var>${options}</var>
+<arg>sys.modules['selenium.webdriver'].ChromeOptions()</arg>
+<arg>sys, selenium.webdriver</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-05-07T17:10:11.465622" elapsed="0.002554"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--incognito</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2026-05-07T17:10:11.468304" elapsed="0.000219"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--start-maximized</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2026-05-07T17:10:11.468601" elapsed="0.000154"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:11.469013" level="INFO">Opening browser 'chrome' to base url 'https://www.saucedemo.com/'.</msg>
+<arg>${BASE_URL}</arg>
+<arg>${BROWSER}</arg>
+<arg>options=${options}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:11.468838" elapsed="1.878666"/>
+</kw>
+<kw name="Set Selenium Timeout" owner="SeleniumLibrary">
+<arg>15s</arg>
+<doc>Sets the timeout that is used by various keywords.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.347765" elapsed="0.001461"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>0.1s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.349439" elapsed="0.000474"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:11.465094" elapsed="1.884979"/>
+</kw>
+<test id="s1-t1" name="TC-001 Login réussi avec un utilisateur standard" line="100">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.352320" elapsed="0.107095"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:13.459814" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.459628" elapsed="0.173723"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:13.967019" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-73.png"&gt;&lt;img src="selenium-screenshot-73.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:13.967323" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:13.633968" elapsed="0.344679">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:13.978967" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.633600" elapsed="0.345422"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:13.979565" elapsed="0.000057"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:13.979801" elapsed="0.000035"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:13.979999" elapsed="0.000043"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:13.980189" elapsed="0.000042"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:13.979235" elapsed="0.001064"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:13.979171" elapsed="0.001207"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:13.980773" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:13.980519" elapsed="0.135117"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:14.115946" elapsed="0.234699"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:13.351668" elapsed="0.999258"/>
+</kw>
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:14.352792" elapsed="0.227906"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:14.581209" elapsed="0.266625"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:14.848158" elapsed="0.243673"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:15.092657" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:15.092218" elapsed="0.517290"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:15.610414" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:15.847018" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:15.609900" elapsed="0.401710"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:16.012242" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:16.011932" elapsed="0.445910"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:14.351938" elapsed="2.106240"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:16.459227" elapsed="0.129674"/>
+</kw>
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:16.850276" level="INFO">Element 'id:react-burger-menu-btn' is displayed.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:16.589824" elapsed="0.260740"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:13.350288" elapsed="3.501052"/>
+</test>
+<test id="s1-t2" name="TC-002 Login échoué avec identifiants invalides" line="106">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:16.853976" elapsed="0.112242"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:16.966689" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:16.966460" elapsed="0.157323"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:17.449908" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-74.png"&gt;&lt;img src="selenium-screenshot-74.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:17.450163" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:17.125034" elapsed="0.328058">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:17.453493" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:17.124223" elapsed="0.329353"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:17.454295" elapsed="0.000078"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:17.454613" elapsed="0.000067"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:17.454904" elapsed="0.000063"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:17.455233" elapsed="0.000064"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:17.453879" elapsed="0.001514"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:17.453788" elapsed="0.001713"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:17.456027" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:17.455687" elapsed="0.140358"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:17.596482" elapsed="0.232786"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:16.853644" elapsed="0.975920"/>
+</kw>
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:17.831300" elapsed="0.235183"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:18.066782" elapsed="0.248862"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:18.316453" elapsed="0.269219"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:18.586406" level="INFO">Typing text 'invalid_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:18.585998" elapsed="0.463404"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:19.050696" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:19.337194" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:19.050010" elapsed="0.502333"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:19.552865" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:19.552606" elapsed="0.450916"/>
+</kw>
+<arg>invalid_user</arg>
+<arg>wrong_pass</arg>
+<status status="PASS" start="2026-05-07T17:10:17.830518" elapsed="2.173234"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Epic sadface</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:20.004336" elapsed="0.120975"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:16.852860" elapsed="3.273146"/>
+</test>
+<test id="s1-t3" name="TC-003 Login bloqué pour locked_out_user" line="111">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:20.129262" elapsed="0.113130"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:20.243322" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:20.242879" elapsed="0.179937"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:20.872045" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-75.png"&gt;&lt;img src="selenium-screenshot-75.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:20.872443" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:20.423779" elapsed="0.451532">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:20.875760" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:20.423153" elapsed="0.452704"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:20.876743" elapsed="0.000101"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:20.877105" elapsed="0.000036"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:20.877252" elapsed="0.000030"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:20.877390" elapsed="0.000033"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:20.876183" elapsed="0.001291"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:20.876099" elapsed="0.001423"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:20.877794" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:20.877612" elapsed="0.171427"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:21.049480" elapsed="0.231241"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:20.128673" elapsed="1.152224"/>
+</kw>
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:21.281957" elapsed="0.227614"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:21.509797" elapsed="0.263153"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:21.773163" elapsed="0.248416"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:22.022012" level="INFO">Typing text 'locked_out_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:22.021779" elapsed="0.426720"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:22.448983" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:22.711334" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:22.448688" elapsed="0.486556"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:22.935647" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:22.935451" elapsed="0.478094"/>
+</kw>
+<arg>${LOCKED_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:21.281505" elapsed="2.132322"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>locked out</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:23.414647" elapsed="0.129136"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:20.127218" elapsed="3.417230"/>
+</test>
+<test id="s1-t4" name="TC-004 Logout depuis le menu latéral" line="116">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:23.546952" elapsed="0.121239"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:23.668900" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:23.668554" elapsed="0.184281"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:24.267435" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-76.png"&gt;&lt;img src="selenium-screenshot-76.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:24.267573" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:23.853872" elapsed="0.414476">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:24.268495" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:23.853216" elapsed="0.415300"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:24.268752" elapsed="0.000026"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:24.268847" elapsed="0.000018"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:24.268940" elapsed="0.000019"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:24.269016" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:24.268610" elapsed="0.000446"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:24.268585" elapsed="0.000504"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:24.269270" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:24.269145" elapsed="0.179734"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:24.449263" elapsed="0.237868"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:23.546638" elapsed="1.140613"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:24.688198" elapsed="0.227970"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:24.916484" elapsed="0.262884"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:25.179582" elapsed="0.246762"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:25.426870" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:25.426577" elapsed="0.475783"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:25.903008" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:26.155786" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:25.902654" elapsed="0.438143"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:26.341500" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:26.341167" elapsed="0.470789"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:24.687978" elapsed="2.124192"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:26.812399" elapsed="0.117705"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:24.687674" elapsed="2.242555"/>
+</kw>
+<kw name="Open Burger Menu">
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:26.931016" level="INFO">Clicking element 'id:react-burger-menu-btn'.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:26.930866" elapsed="0.315136"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:27.246315" elapsed="0.241737"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:26.930620" elapsed="0.557551"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:27.488818" level="INFO">Clicking element 'id:logout_sidebar_link'.</msg>
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:27.488623" elapsed="0.385837"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:login-button</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:27.874998" elapsed="0.221721"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:23.545820" elapsed="4.551365"/>
+</test>
+<test id="s1-t5" name="TC-005 Vérification de la liste des produits" line="123">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:28.098809" elapsed="0.109387"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:28.208688" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:28.208433" elapsed="0.166845"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:28.776926" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-77.png"&gt;&lt;img src="selenium-screenshot-77.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:28.777105" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:28.376326" elapsed="0.402030">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:28.778568" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:28.375682" elapsed="0.402921"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:28.778946" elapsed="0.000037"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:28.779091" elapsed="0.000027"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:28.779200" elapsed="0.000024"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:28.779302" elapsed="0.000024"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:28.778742" elapsed="0.000619"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:28.778705" elapsed="0.000698"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:28.779633" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:28.779476" elapsed="0.184569"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:28.964299" elapsed="0.234043"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:28.098590" elapsed="1.099990"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:29.200410" elapsed="0.232086"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:29.432687" elapsed="0.253507"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:29.686392" elapsed="0.246051"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:29.932853" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:29.932638" elapsed="0.473061"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:30.406544" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:30.671551" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:30.406095" elapsed="0.472507"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:30.879350" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:30.878975" elapsed="0.487640"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:29.199914" elapsed="2.166831"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.366878" elapsed="0.114419"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:29.199376" elapsed="2.282059"/>
+</kw>
+<kw name="Get Element Count" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:31.599461" level="INFO">${count} = 6</msg>
+<var>${count}</var>
+<arg>class:inventory_item</arg>
+<doc>Returns the number of elements matching ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.482037" elapsed="0.117520"/>
+</kw>
+<kw name="Should Be Equal As Integers" owner="BuiltIn">
+<msg time="2026-05-07T17:10:31.600971" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${count}</arg>
+<arg>6</arg>
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.600374" elapsed="0.000708"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:28.097993" elapsed="3.503587"/>
+</test>
+<test id="s1-t6" name="TC-006 Tri des produits par prix croissant" line="129">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.604111" elapsed="0.127722"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:31.732244" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.732050" elapsed="0.176236"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:32.295481" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-78.png"&gt;&lt;img src="selenium-screenshot-78.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:32.295662" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:31.909279" elapsed="0.387089">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:32.296492" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:31.908684" elapsed="0.387827"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:32.296742" elapsed="0.000023"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:32.296828" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:32.296910" elapsed="0.000022"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:32.296985" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:32.296603" elapsed="0.000419"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:32.296566" elapsed="0.000481"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:32.297203" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:32.297090" elapsed="0.159340"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:32.456654" elapsed="0.236420"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:31.603746" elapsed="1.089541"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:32.695026" elapsed="0.231605"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:32.926865" elapsed="0.246205"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:33.173380" elapsed="0.253615"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:33.427433" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:33.427188" elapsed="0.450975"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:33.878592" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:34.136479" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:33.878362" elapsed="0.462005"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:34.341066" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:34.340715" elapsed="0.507321"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:32.694593" elapsed="2.153690"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:34.848570" elapsed="0.119946"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:32.694103" elapsed="2.274654"/>
+</kw>
+<kw name="Select From List By Value" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:34.969965" level="INFO">Selecting options from selection list 'class:product_sort_container' by value lohi.</msg>
+<arg>class:product_sort_container</arg>
+<arg>lohi</arg>
+<doc>Selects options from selection list ``locator`` by ``values``.</doc>
+<status status="PASS" start="2026-05-07T17:10:34.969536" elapsed="1.016569"/>
+</kw>
+<kw name="Get Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:36.232115" level="INFO">${first_price} = $7.99</msg>
+<var>${first_price}</var>
+<arg>xpath=(//div[contains(@class,'inventory_item_price')])[1]</arg>
+<doc>Returns the text value of the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:35.987013" elapsed="0.245197"/>
+</kw>
+<kw name="Should Contain" owner="BuiltIn">
+<arg>${first_price}</arg>
+<arg>7.99</arg>
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<status status="PASS" start="2026-05-07T17:10:36.232929" elapsed="0.000987"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:31.602965" elapsed="4.631584"/>
+</test>
+<test id="s1-t7" name="TC-007 Tri des produits par nom décroissant" line="138">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:36.237504" elapsed="0.118659"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:36.357076" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:36.356600" elapsed="0.180734"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:36.976193" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-79.png"&gt;&lt;img src="selenium-screenshot-79.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:36.976474" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:36.538441" elapsed="0.439750">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:36.978441" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:36.537748" elapsed="0.440746"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:36.978981" elapsed="0.000061"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:36.979210" elapsed="0.000044"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:36.979393" elapsed="0.000064"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:36.979598" elapsed="0.000037"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:36.978687" elapsed="0.001006"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:36.978639" elapsed="0.001122"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:36.980109" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:36.979880" elapsed="0.176423"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:37.156668" elapsed="0.234436"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:36.237082" elapsed="1.154222"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:37.392778" elapsed="0.231381"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:37.624346" elapsed="0.269631"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:37.894167" elapsed="0.250089"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:38.144644" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:38.144436" elapsed="0.469843"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:38.615105" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:38.906420" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:38.614662" elapsed="0.483524"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:39.098815" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:39.098502" elapsed="0.477220"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:37.392423" elapsed="2.183569"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:39.576263" elapsed="0.119375"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:37.392008" elapsed="2.303864"/>
+</kw>
+<kw name="Select From List By Value" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:39.696965" level="INFO">Selecting options from selection list 'class:product_sort_container' by value za.</msg>
+<arg>class:product_sort_container</arg>
+<arg>za</arg>
+<doc>Selects options from selection list ``locator`` by ``values``.</doc>
+<status status="PASS" start="2026-05-07T17:10:39.696551" elapsed="0.967898"/>
+</kw>
+<kw name="Get Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:40.911384" level="INFO">${first_item} = Test.allTheThings() T-Shirt (Red)</msg>
+<var>${first_item}</var>
+<arg>xpath=(//div[contains(@class,'inventory_item_name')])[1]</arg>
+<doc>Returns the text value of the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:40.665258" elapsed="0.246217"/>
+</kw>
+<kw name="Should Contain" owner="BuiltIn">
+<arg>${first_item}</arg>
+<arg>Test.allTheThings()</arg>
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<status status="PASS" start="2026-05-07T17:10:40.912206" elapsed="0.000695"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:36.235993" elapsed="4.677458"/>
+</test>
+<test id="s1-t8" name="TC-008 Ajout produit au panier depuis la liste" line="147">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:40.916656" elapsed="0.119289"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:41.036541" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:41.036254" elapsed="0.190576"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:41.634738" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-80.png"&gt;&lt;img src="selenium-screenshot-80.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:41.635026" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:41.227886" elapsed="0.408861">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:41.637022" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:41.227230" elapsed="0.409842"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:41.637504" elapsed="0.000043"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:41.637675" elapsed="0.000034"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:41.637829" elapsed="0.000032"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:41.637983" elapsed="0.000027"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:41.637267" elapsed="0.000784"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:41.637211" elapsed="0.000887"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:41.638369" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:41.638182" elapsed="0.189528"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:41.828091" elapsed="0.229868"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:40.916209" elapsed="1.141971"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:42.059696" elapsed="0.231403"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:42.291387" elapsed="0.255017"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:42.546774" elapsed="0.246243"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:42.793596" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:42.793318" elapsed="0.452141"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:43.246353" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:43.500860" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:43.245858" elapsed="0.468457"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:43.714743" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:43.714527" elapsed="0.472419"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:42.059266" elapsed="2.127927"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:44.187455" elapsed="0.118908"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:42.058792" elapsed="2.247864"/>
+</kw>
+<kw name="Add Backpack To Cart">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:add-to-cart-sauce-labs-backpack</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:44.308532" elapsed="0.243250"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:44.552198" level="INFO">Clicking element 'id:add-to-cart-sauce-labs-backpack'.</msg>
+<arg>id:add-to-cart-sauce-labs-backpack</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:44.552008" elapsed="0.348067"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:44.307929" elapsed="0.592395"/>
+</kw>
+<kw name="Element Text Should Be" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:44.901434" level="INFO">Verifying element 'class:shopping_cart_badge' contains exact text '1'.</msg>
+<arg>class:shopping_cart_badge</arg>
+<arg>1</arg>
+<doc>Verifies that element ``locator`` contains exact the text ``expected``.</doc>
+<status status="PASS" start="2026-05-07T17:10:44.901027" elapsed="0.240754"/>
+</kw>
+<kw name="Open Cart">
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:45.142613" level="INFO">Clicking element 'class:shopping_cart_link'.</msg>
+<arg>class:shopping_cart_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:45.142432" elapsed="0.356295"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:45.142177" elapsed="0.356747"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:45.732771" level="INFO">Current page contains text 'Sauce Labs Backpack'.</msg>
+<arg>Sauce Labs Backpack</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-05-07T17:10:45.499532" elapsed="0.233462"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:40.915118" elapsed="4.818444"/>
+</test>
+<test id="s1-t9" name="TC-009 Ajout produit depuis la fiche produit" line="158">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:10:45.736416" elapsed="0.120720"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:45.857803" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:45.857493" elapsed="0.189940"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:46.467335" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-81.png"&gt;&lt;img src="selenium-screenshot-81.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:10:46.467603" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:46.048312" elapsed="0.421058">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:10:46.469611" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:10:46.047753" elapsed="0.421904"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:46.470046" elapsed="0.000044"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:46.470228" elapsed="0.000037"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:46.470387" elapsed="0.000034"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:10:46.470542" elapsed="0.000033"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:10:46.469812" elapsed="0.000811"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:10:46.469774" elapsed="0.000907"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:46.471040" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:10:46.470779" elapsed="0.174138"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:46.645303" elapsed="0.238044"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:45.735956" elapsed="1.147625"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:10:46.885601" elapsed="0.233731"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:47.119548" elapsed="0.262354"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:47.382129" elapsed="0.253208"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:47.635806" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:47.635554" elapsed="0.459956"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:48.096253" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:10:48.359575" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:48.095842" elapsed="0.475041"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:48.571312" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:48.571106" elapsed="0.464436"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:10:46.885121" elapsed="2.150669"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:10:49.036049" elapsed="0.119510"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:10:46.884580" elapsed="2.271210"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:10:49.156893" level="INFO">Clicking element 'xpath=//div[contains(@class,'inventory_item_name') and text()='Sauce Labs Bike Light']'.</msg>
+<arg>xpath=//div[contains(@class,'inventory_item_name') and text()='Sauce Labs Bike Light']</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:10:49.156502" elapsed="0.401732"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:05.327148" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-82.png"&gt;&lt;img src="selenium-screenshot-82.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:11:05.327431" level="FAIL">Element 'id:add-to-cart-sauce-labs-bike-light' not visible after 15 seconds.</msg>
+<arg>id:add-to-cart-sauce-labs-bike-light</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:10:49.558972" elapsed="15.771042">Element 'id:add-to-cart-sauce-labs-bike-light' not visible after 15 seconds.</status>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:add-to-cart-sauce-labs-bike-light</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:05.330662" elapsed="0.000055"/>
+</kw>
+<kw name="Element Text Should Be" owner="SeleniumLibrary">
+<arg>class:shopping_cart_badge</arg>
+<arg>1</arg>
+<doc>Verifies that element ``locator`` contains exact the text ``expected``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:05.331181" elapsed="0.000043"/>
+</kw>
+<kw name="Open Cart">
+<status status="NOT RUN" start="2026-05-07T17:11:05.331643" elapsed="0.000042"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<arg>Bike Light</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:05.331880" elapsed="0.000033"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:10:45.734957" elapsed="19.597220">Element 'id:add-to-cart-sauce-labs-bike-light' not visible after 15 seconds.</status>
+</test>
+<test id="s1-t10" name="TC-010 Suppression d'un produit du panier" line="172">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<doc>Deletes all cookies.</doc>
+<status status="PASS" start="2026-05-07T17:11:05.333659" elapsed="0.118556"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:05.452845" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:11:05.452525" elapsed="0.201835"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:06.082984" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-83.png"&gt;&lt;img src="selenium-screenshot-83.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-05-07T17:11:06.083178" level="FAIL">Element with locator 'id:react-burger-menu-btn' not found.</msg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:11:05.655419" elapsed="0.428892">Element with locator 'id:react-burger-menu-btn' not found.</status>
+</kw>
+<msg time="2026-05-07T17:11:06.084611" level="INFO">${logged_in} = False</msg>
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-05-07T17:11:05.654785" elapsed="0.429853"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:06.084957" elapsed="0.000026"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:06.085053" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:06.085127" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:06.085199" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:06.084774" elapsed="0.000464"/>
+</branch>
+<status status="PASS" start="2026-05-07T17:11:06.084740" elapsed="0.000530"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:06.085450" level="INFO">Opening url 'https://www.saucedemo.com/'</msg>
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-05-07T17:11:06.085320" elapsed="0.174688"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:11:06.260180" elapsed="0.229315"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:11:05.333452" elapsed="1.156181"/>
+</kw>
+<kw name="Login As Standard User">
+<kw name="Login With Credentials">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-05-07T17:11:06.490716" elapsed="0.231959"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:11:06.722891" elapsed="0.265223"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id:password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:11:06.988318" elapsed="0.262559"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:07.251458" level="INFO">Typing text 'standard_user' into text field 'id:user-name'.</msg>
+<arg>id:user-name</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:11:07.251178" elapsed="0.475047"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:07.726706" level="INFO">Typing password into text field 'id:password'.</msg>
+<msg time="2026-05-07T17:11:07.998739" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>id:password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:11:07.726440" elapsed="0.485277"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:08.212275" level="INFO">Clicking button 'id:login-button'.</msg>
+<arg>id:login-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-05-07T17:11:08.211938" elapsed="0.444002"/>
+</kw>
+<arg>${STANDARD_USER}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2026-05-07T17:11:06.490506" elapsed="2.165661"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>Products</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-05-07T17:11:08.656403" elapsed="0.117847"/>
+</kw>
+<status status="PASS" start="2026-05-07T17:11:06.490218" elapsed="2.284261"/>
+</kw>
+<kw name="Add Backpack To Cart">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.800078" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.800699" level="FAIL">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=147.0.7727.138); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d6ed]
+	chromedriver!(No symbol) [0x7ff797938762]
+	chromedriver!(No symbol) [0x7ff79795f00c]
+	chromedriver!(No symbol) [0x7ff7979d7170]
+	chromedriver!(No symbol) [0x7ff7979f4122]
+	chromedriver!(No symbol) [0x7ff7979990e8]
+	chromedriver!(No symbol) [0x7ff797999fc3]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!GetHandleVerifier [0x7ff797be40e4+1e644]
+	chromedriver!GetHandleVerifier [0x7ff797be4296+1e7f6]
+	chromedriver!GetHandleVerifier [0x7ff797bc8737+2c97]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<arg>id:add-to-cart-sauce-labs-backpack</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-05-07T17:11:08.775732" elapsed="7.061670">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=147.0.7727.138); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d6ed]
+	chromedriver!(No symbol) [0x7ff797938762]
+	chromedriver!(No symbol) [0x7ff79795f00c]
+	chromedriver!(No symbol) [0x7ff7979d7170]
+	chromedriver!(No symbol) [0x7ff7979f4122]
+	chromedriver!(No symbol) [0x7ff7979990e8]
+	chromedriver!(No symbol) [0x7ff797999fc3]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!GetHandleVerifier [0x7ff797be40e4+1e644]
+	chromedriver!GetHandleVerifier [0x7ff797be4296+1e7f6]
+	chromedriver!GetHandleVerifier [0x7ff797bc8737+2c97]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:add-to-cart-sauce-labs-backpack</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.837643" elapsed="0.000059"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:08.775252" elapsed="7.062593">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=147.0.7727.138); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d6ed]
+	chromedriver!(No symbol) [0x7ff797938762]
+	chromedriver!(No symbol) [0x7ff79795f00c]
+	chromedriver!(No symbol) [0x7ff7979d7170]
+	chromedriver!(No symbol) [0x7ff7979f4122]
+	chromedriver!(No symbol) [0x7ff7979990e8]
+	chromedriver!(No symbol) [0x7ff797999fc3]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!GetHandleVerifier [0x7ff797be40e4+1e644]
+	chromedriver!GetHandleVerifier [0x7ff797be4296+1e7f6]
+	chromedriver!GetHandleVerifier [0x7ff797bc8737+2c97]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Open Cart">
+<status status="NOT RUN" start="2026-05-07T17:11:15.838206" elapsed="0.000038"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:remove-sauce-labs-backpack</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.838593" elapsed="0.000045"/>
+</kw>
+<kw name="Page Should Not Contain" owner="SeleniumLibrary">
+<arg>Sauce Labs Backpack</arg>
+<doc>Verifies the current page does not contain ``text``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.839000" elapsed="0.000039"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:05.333062" elapsed="10.506225">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=147.0.7727.138); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d6ed]
+	chromedriver!(No symbol) [0x7ff797938762]
+	chromedriver!(No symbol) [0x7ff79795f00c]
+	chromedriver!(No symbol) [0x7ff7979d7170]
+	chromedriver!(No symbol) [0x7ff7979f4122]
+	chromedriver!(No symbol) [0x7ff7979990e8]
+	chromedriver!(No symbol) [0x7ff797999fc3]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!GetHandleVerifier [0x7ff797be40e4+1e644]
+	chromedriver!GetHandleVerifier [0x7ff797be4296+1e7f6]
+	chromedriver!GetHandleVerifier [0x7ff797bc8737+2c97]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t11" name="TC-011 Checkout avec prénom vide" line="182">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.843781" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.844214" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.841070" elapsed="0.021208">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.862518" elapsed="0.000039"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.862650" elapsed="0.000020"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.862974" elapsed="0.000022"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.863066" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.863139" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.863207" elapsed="0.000015"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.862746" elapsed="0.000500"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.862725" elapsed="0.000643"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.863441" elapsed="0.000022"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.863520" elapsed="0.000016"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.840831" elapsed="0.022824">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.840000" elapsed="0.024037">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t12" name="TC-012 Checkout complet valide" line="197">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.868505" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.868970" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.865435" elapsed="0.004413">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870057" elapsed="0.000036"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870188" elapsed="0.000023"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870402" elapsed="0.000023"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870500" elapsed="0.000022"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870599" elapsed="0.000038"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870707" elapsed="0.000018"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870308" elapsed="0.000444"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870278" elapsed="0.000506"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870835" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.870917" elapsed="0.000018"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.865226" elapsed="0.005821">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.864742" elapsed="0.006727">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t13" name="TC-013 Accès direct au panier sans auth" line="216">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.876272" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.876986" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.873656" elapsed="0.004286">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878141" elapsed="0.000032"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878259" elapsed="0.000020"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878421" elapsed="0.000016"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878495" elapsed="0.000015"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878564" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878633" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878348" elapsed="0.000324"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878330" elapsed="0.000369"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878744" elapsed="0.000016"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.878838" elapsed="0.000019"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.873399" elapsed="0.005551">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.872633" elapsed="0.006522">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t14" name="TC-014 Menu latéral ouverture fermeture" line="222">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.883801" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.884407" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.880415" elapsed="0.004947">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885576" elapsed="0.000044"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885718" elapsed="0.000022"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885913" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885998" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.886091" elapsed="0.000018"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.886167" elapsed="0.000022"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885829" elapsed="0.000385"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.885801" elapsed="0.000446"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.886295" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.886371" elapsed="0.000018"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.880200" elapsed="0.006316">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.879692" elapsed="0.007238">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t15" name="TC-015 Navigation vers All Items" line="231">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.892515" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.892914" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.888596" elapsed="0.005409">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894262" elapsed="0.000049"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894400" elapsed="0.000021"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894592" elapsed="0.000021"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894678" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894753" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894829" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894496" elapsed="0.000375"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894477" elapsed="0.000424"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.894950" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.895026" elapsed="0.000017"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.888247" elapsed="0.006895">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.887662" elapsed="0.007757">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t16" name="TC-016 Réinitialisation état application" line="242">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.899611" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.900146" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.896841" elapsed="0.004204">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901243" elapsed="0.000035"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901379" elapsed="0.000020"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901555" elapsed="0.000019"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901636" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901711" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901781" elapsed="0.000035"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901479" elapsed="0.000375"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.901459" elapsed="0.000450"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.902006" elapsed="0.000034"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.902154" elapsed="0.000024"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.896594" elapsed="0.005698">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.895998" elapsed="0.006768">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t17" name="TC-017 performance_glitch_user" line="255">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.908216" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.908880" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.904932" elapsed="0.004846">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910220" elapsed="0.000068"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910446" elapsed="0.000033"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910664" elapsed="0.000026"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910753" elapsed="0.000017"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910826" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910895" elapsed="0.000018"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910579" elapsed="0.000358"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.910559" elapsed="0.000408"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.911017" elapsed="0.000022"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.911101" elapsed="0.000015"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.904518" elapsed="0.006713">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.903722" elapsed="0.007753">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t18" name="TC-018 Vérification badge panier" line="267">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.916613" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.917483" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.913023" elapsed="0.005482">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.918728" elapsed="0.000032"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.918855" elapsed="0.000022"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919053" elapsed="0.000020"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919154" elapsed="0.000020"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919236" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919308" elapsed="0.000017"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.918963" elapsed="0.000385"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.918942" elapsed="0.000439"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919432" elapsed="0.000019"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.919508" elapsed="0.000015"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.912803" elapsed="0.006817">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.912228" elapsed="0.007668">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t19" name="TC-019 Accès page About" line="277">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.923798" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.924285" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.921112" elapsed="0.004059">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925351" elapsed="0.000033"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925472" elapsed="0.000020"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925661" elapsed="0.000022"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925752" elapsed="0.000018"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925831" elapsed="0.000018"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925914" elapsed="0.000023"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925569" elapsed="0.000412"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.925547" elapsed="0.000467"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.926079" elapsed="0.000025"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.926193" elapsed="0.000027"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.920876" elapsed="0.005533">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.920386" elapsed="0.006761">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<test id="s1-t20" name="TC-020 Produit déjà présent" line="286">
+<kw name="Reset Application State" type="SETUP">
+<kw name="Delete All Cookies" owner="SeleniumLibrary">
+<msg time="2026-05-07T17:11:15.932194" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.932737" level="FAIL">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<doc>Deletes all cookies.</doc>
+<status status="FAIL" start="2026-05-07T17:11:15.929091" elapsed="0.004581">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.933859" elapsed="0.000030"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<var>${logged_in}</var>
+<arg>Element Should Be Visible</arg>
+<arg>id:react-burger-menu-btn</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.933976" elapsed="0.000021"/>
+</kw>
+<if>
+<branch type="IF" condition="${logged_in}">
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:react-burger-menu-btn</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934140" elapsed="0.000017"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934215" elapsed="0.000016"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:reset_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934281" elapsed="0.000015"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>id:logout_sidebar_link</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934347" elapsed="0.000016"/>
+</kw>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934069" elapsed="0.000330"/>
+</branch>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934051" elapsed="0.000378"/>
+</if>
+<kw name="Go To" owner="SeleniumLibrary">
+<arg>${BASE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934478" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id:user-name</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-05-07T17:11:15.934547" elapsed="0.000014"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.928821" elapsed="0.005831">InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</kw>
+<status status="FAIL" start="2026-05-07T17:11:15.928318" elapsed="0.006747">Setup failed:
+InvalidSessionIdException: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</status>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-05-07T17:11:15.936261" elapsed="2.140386"/>
+</kw>
+<status status="FAIL" start="2026-05-07T17:10:11.286358" elapsed="66.790455"/>
+</suite>
+<statistics>
+<total>
+<stat pass="8" fail="12" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Rf Gen 1778168134" id="s1" pass="8" fail="12" skip="0">Rf Gen 1778168134</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2026-05-07T17:11:15.800078" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.843781" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.868505" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.876272" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.883801" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.892515" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.899611" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.908216" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.916613" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.923798" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+<msg time="2026-05-07T17:11:15.932194" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff797bda8e5+14e45]
+	chromedriver!GetHandleVerifier [0x7ff797bda950+14eb0]
+	chromedriver!(No symbol) [0x7ff79794d4d6]
+	chromedriver!(No symbol) [0x7ff797998166]
+	chromedriver!(No symbol) [0x7ff7979cff32]
+	chromedriver!(No symbol) [0x7ff7979ca191]
+	chromedriver!(No symbol) [0x7ff7979c9433]
+	chromedriver!(No symbol) [0x7ff797916005]
+	chromedriver!GetHandleVerifier [0x7ff797ef0149+32a6a9]
+	chromedriver!GetHandleVerifier [0x7ff797eea715+324c75]
+	chromedriver!GetHandleVerifier [0x7ff797f0c012+346572]
+	chromedriver!GetHandleVerifier [0x7ff797bf7cb5+32215]
+	chromedriver!GetHandleVerifier [0x7ff797c0087c+3addc]
+	chromedriver!(No symbol) [0x7ff797914d9a]
+	chromedriver!GetHandleVerifier [0x7ff7980560a8+490608]
+	KERNEL32!BaseThreadInitThunk [0x7ffcbe28e8d7+17]
+	ntdll!RtlUserThreadStart [0x7ffcbedcc3fc+2c]
+</msg>
+</errors>
+</robot>

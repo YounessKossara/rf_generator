@@ -12,6 +12,7 @@ this module automatically:
 import re
 from tools.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
+from rf_agent.app_memory import rf_to_playwright
 
 try:
     from playwright.async_api import async_playwright
@@ -56,35 +57,60 @@ def is_healable_error(error_message: str) -> bool:
     return False
 
 
-def _needs_login(tc_rf_code: str) -> bool:
-    """Check if a test case requires login before the failing action."""
+def _needs_login(tc_rf_code: str, success_indicator: str = "") -> bool:
+    """
+    Check if a test case requires login before the failing action.
+    Looks for password field interaction (universal across apps).
+    """
     lines = tc_rf_code.lower()
-    has_login = "input text" in lines and ("password" in lines or "admin" in lines)
-    has_post_login = any(kw in lines for kw in [
+    has_password_interaction = "input text" in lines and "password" in lines
+
+    post_login_indicators = [
         "logout", "dashboard", "my info", "profile", "welcome",
-        "dropdown", "userdropdown", "sidebar", "menu"
-    ])
-    return has_login or has_post_login
+        "dropdown", "menu", "sidebar", "account"
+    ]
+    if success_indicator:
+        post_login_indicators.append(success_indicator.lower())
+
+    has_post_login_content = any(kw in lines for kw in post_login_indicators)
+    return has_password_interaction or has_post_login_content
 
 
 def _extract_credentials_from_rf(tc_rf_code: str) -> tuple:
-    """Extract username/password from a test case's Input Text lines."""
-    username = "Admin"
-    password = "admin123"
+    """
+    Extract username/password from Input Text lines by examining the selector.
+
+    Uses selector keywords to determine which field is username vs password:
+      - Selectors with 'user', 'email', 'login', 'username' → username field
+      - Selectors with 'password', 'pass', 'pwd', 'secret' → password field
+    """
+    username = None
+    password = None
+
     for line in tc_rf_code.split("\n"):
-        line_stripped = line.strip().lower()
-        if "input text" in line_stripped and "username" in line_stripped:
-            parts = line.strip().split()
-            if len(parts) >= 4:
-                username = parts[-1]
-        if "input text" in line_stripped and "password" in line_stripped:
-            parts = line.strip().split()
-            if len(parts) >= 4:
-                password = parts[-1]
-    return username, password
+        stripped = line.strip()
+        if not stripped.lower().startswith("input text"):
+            continue
+
+        # Split on 2+ spaces (RF separator)
+        parts = re.split(r'\s{2,}', stripped)
+        if len(parts) < 3:
+            continue
+
+        selector = parts[1].lower()
+        value = parts[2].strip()
+
+        # Determine which credential this is based on selector content
+        if any(kw in selector for kw in ["username", "user", "email", "login", "userid", "user_name"]):
+            username = value
+        elif any(kw in selector for kw in ["password", "pass", "pwd", "secret"]):
+            password = value
+
+    # Fallback to empty strings if not found (healer will try to log in, may fail gracefully)
+    return username or "", password or ""
 
 
-def _extract_target_url(tc_rf_code: str, base_url: str) -> str:
+def _extract_target_url(tc_rf_code: str) -> str:
     """Extract the target page URL from Go To / Navigate To keywords in TC code."""
     for line in tc_rf_code.split("\n"):
         stripped = line.strip()
@@ -95,20 +121,18 @@ def _extract_target_url(tc_rf_code: str, base_url: str) -> str:
                 return parts[-1]
             elif len(parts) >= 2:
                 return parts[-1]
-    # Check for My Info / PIM navigation keywords
-    lower_code = tc_rf_code.lower()
-    if "my info" in lower_code or "personal" in lower_code or "profile" in lower_code:
-        return base_url.rstrip('/') + "/web/index.php/pim/viewPersonalDetails/empNumber/7"
     return ""
 
 
 async def fetch_page_html(url: str, needs_login: bool = False,
-                          username: str = "Admin",
-                          password: str = "admin123",
-                          target_url: str = "") -> str:
+                          username: str = "",
+                          password: str = "",
+                          target_url: str = "",
+                          login_recipe: dict = None) -> str:
     """
     Fetch real DOM HTML using Playwright (headless Chrome).
-    If needs_login=True, performs login first.
+    If needs_login=True, performs login first using the provided credentials.
+    Uses login_recipe selectors if provided, otherwise falls back to generic selectors.
     If target_url is set, navigates there after login to get the correct page DOM.
     """
     if HAS_PLAYWRIGHT:
@@ -119,24 +143,40 @@ async def fetch_page_html(url: str, needs_login: bool = False,
                 await page.goto(url, timeout=15000)
                 await page.wait_for_timeout(3000)
 
-                if needs_login:
+                if needs_login and username and password:
                     try:
-                        print("   🔑 [HEALER] Logging in to fetch post-login DOM...")
-                        usr = page.locator("input[placeholder='Username']")
-                        pwd = page.locator("input[placeholder='Password']")
-                        if await usr.count() > 0:
+                        print(f"   🔑 [HEALER] Logging in as {username}...")
+
+                        # Use recipe selectors if available, otherwise generic fallbacks
+                        recipe = login_recipe or {}
+                        usr_sel = rf_to_playwright(recipe.get("username_selector", "")) if recipe.get("username_selector") else ""
+                        pwd_sel = rf_to_playwright(recipe.get("password_selector", "")) if recipe.get("password_selector") else ""
+                        btn_sel = rf_to_playwright(recipe.get("submit_selector", "")) if recipe.get("submit_selector") else ""
+
+                        # Fallback if recipe selectors not available
+                        if not usr_sel:
+                            usr_sel = "input[type='text'], input[placeholder*='user' i], input[placeholder*='email' i]"
+                        if not pwd_sel:
+                            pwd_sel = "input[type='password']"
+                        if not btn_sel:
+                            btn_sel = "button[type='submit'], input[type='submit']"
+
+                        usr = page.locator(usr_sel).first
+                        pwd = page.locator(pwd_sel).first
+                        btn = page.locator(btn_sel).first
+
+                        if await usr.count() > 0 and await pwd.count() > 0:
                             await usr.fill(username)
                             await pwd.fill(password)
-                            btn = page.locator("button[type='submit']")
                             if await btn.count() > 0:
                                 await btn.click()
                                 await page.wait_for_timeout(3000)
                                 print("   ✅ [HEALER] Logged in")
+
                                 # Navigate to target page if specified
                                 if target_url:
                                     print(f"   🔗 [HEALER] Navigating to {target_url}")
-                                    await page.goto(target_url, timeout=15000,
-                                                    wait_until="networkidle")
+                                    await page.goto(target_url, timeout=15000, wait_until="networkidle")
                                     await page.wait_for_timeout(2000)
                                     print("   ✅ [HEALER] Target page loaded")
                     except Exception as login_err:
@@ -259,10 +299,26 @@ def heal_test_case(
     error_message: str,
     page_html: str,
     base_url: str,
-    attempt: int
+    attempt: int,
+    app_recipe: dict = None
 ) -> str:
-    """Ask LLM to fix a failing test case using real DOM context."""
+    """Ask LLM to fix a failing test case using real DOM context and app-specific recipe."""
     failing_selector = extract_failed_selector(error_message)
+    app_recipe = app_recipe or {}
+
+    # Build dynamic app context from recipe instead of hardcoded rules
+    app_context = ""
+    if app_recipe:
+        app_context = f"""
+APP-SPECIFIC CONTEXT (discovered from {base_url}):
+- App type: {app_recipe.get('app_type', 'unknown')}
+- Login username field: {app_recipe.get('username_selector', 'unknown')}
+- Login password field: {app_recipe.get('password_selector', 'unknown')}
+- Login submit button: {app_recipe.get('submit_selector', 'unknown')}
+- Success indicator after login: {app_recipe.get('success_indicator', 'unknown')}
+- Special notes: {app_recipe.get('notes', 'none')}
+
+MANDATORY: Use ONLY the selectors above for login. Do NOT substitute them."""
 
     prompt = f"""You are a Robot Framework expert fixing a failing test.
 
@@ -280,45 +336,32 @@ REAL PAGE HTML (from target app):
 BASE URL: {base_url}
 HEALING ATTEMPT: {attempt}/3
 
-ORANGEHRM SPECIFIC RULES:
-- Login inputs: placeholder='Username' and placeholder='Password'
-- Submit: xpath://button[@type='submit']
-- Logout is HIDDEN in a dropdown:
-    Click Element    xpath://span[@class='oxd-userdropdown-tab']
-    Sleep    1s
-    Wait Until Element Is Visible    xpath://a[normalize-space()='Logout']    5s
-    Click Element    xpath://a[normalize-space()='Logout']
-- My Info page navigation: Click Element    xpath://span[text()='My Info']
-- Edit/Save button: xpath://button[contains(@class,'oxd-button--ghost')]
-- Save button: xpath://button[@type='submit' and contains(@class,'oxd-button--secondary')]
-- First name field: xpath://input[@name='firstName']
-- Errors: xpath://div[contains(@class,'oxd-alert')]
-- Required field errors: xpath://span[contains(@class,'oxd-input-field-error')]
+{app_context}
 
-EMPTY FIELD RULES:
-- Input Text ALWAYS requires 2 arguments: locator AND value
-- For empty field tests, do NOT use Input Text. Just click submit directly.
-- To clear a field: Clear Element Text    xpath://input[@placeholder='Username']
+GENERIC RULES:
+- NEVER use @name selectors
+- Prefer: @placeholder, @type, text content, CSS classes
+- Use Wait Until Element Is Visible before every interaction (15s timeout)
+- Add Sleep 2s after page navigation, Sleep 3s after Open Browser
+- Use Set Window Size 1920 1080, never Maximize Browser Window
+- For empty field tests, skip Input Text and click submit directly
 
-RULES:
+RULES FOR FIXING:
 - Return ONLY the fixed test case code (starting from TC name line)
 - Do NOT include *** Settings ***, *** Variables ***, or *** Test Cases ***
-- NEVER use @name selectors
-- Use @placeholder, @type, text(), or class selectors from real HTML
-- Add Wait Until Element Is Visible before interactions (15s timeout)
-- Keep Set Screenshot Directory and Capture Page Screenshot lines
-- Keep [Documentation] line
-- Add Sleep    3s after Open Browser, Sleep    2s after clicks
-- NEVER use 'Maximize Browser Window'. Use 'Set Window Size    1920    1080' instead.
+- Keep [Documentation] line and Set Screenshot Directory line
+- Keep all Capture Page Screenshot lines
+- Use proper indentation (4 spaces under test case)
 
-Return ONLY the fixed test case RF code, nothing else."""
+Return ONLY the fixed RF code, no explanations, no markdown fences."""
 
     response = invoke_with_retry(
         get_smart_llm,
         [
-            SystemMessage(content="You are a Robot Framework self-healing expert. "
-                          "Return ONLY valid RF test case code. No explanations, "
-                          "no markdown fences, no section headers."),
+            SystemMessage(content=(
+                "You are a Robot Framework self-healing expert. "
+                "Return ONLY valid RF test case code. No explanations, no markdown, no section headers."
+            )),
             HumanMessage(content=prompt)
         ]
     )
