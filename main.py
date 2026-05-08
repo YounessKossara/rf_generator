@@ -111,7 +111,7 @@ async def generate_rf_endpoint(req: RFRequest):
 
         # 2. Generate RF code
         print("🤖 Generating Robot Framework code via LLM (Batch Mode)...")
-        rf_code = generate_rf_code(test_cases, req.base_url)
+        rf_code = generate_rf_code(test_cases, req.base_url, raw_md=req.markdown_content)
 
         # 3. Save to output directory
         test_name = f"rf_gen_{int(time.time())}"

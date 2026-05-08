@@ -73,19 +73,65 @@ def rf_to_playwright(rf_sel: str) -> str:
 
 # ── LLM-powered discovery ─────────────────────────────────────────────────────
 
+async def _fetch_rendered_login_html(base_url: str) -> str:
+    """
+    Fetch the login page DOM **after** JavaScript has rendered it. Used as a
+    fallback when the static HTML (e.g. httpx) only returns the React/Vue shell.
+    """
+    try:
+        from playwright.async_api import async_playwright
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.goto(base_url, timeout=15000)
+            await page.wait_for_timeout(2500)
+            html = await page.content()
+            await browser.close()
+            return html
+    except Exception as e:
+        print(f"   ⚠️  Playwright login HTML fetch failed: {e}")
+        return ""
+
+
+def _static_html_lacks_form(html: str) -> bool:
+    """True when the HTML appears to be a JS shell with no real form elements."""
+    if not html:
+        return True
+    lowered = html.lower()
+    # Need at least an input tag and either a password field or a submit button.
+    if "<input" not in lowered:
+        return True
+    if "type=\"password\"" not in lowered and "type='password'" not in lowered:
+        return True
+    return False
+
+
 def discover_login_recipe(html: str, base_url: str) -> dict:
     """
     Use the LLM to extract the login recipe from real page HTML.
+    Falls back to a Playwright-rendered DOM when the static HTML is missing
+    form elements (typical for SPAs).
     Returns a dict with selector keys; empty dict on failure.
     """
     print("   🧠 [MEMORY] Discovering login recipe from page HTML...")
 
+    if _static_html_lacks_form(html):
+        print("   🔁 Static HTML missing form elements — re-fetching rendered DOM via Playwright...")
+        try:
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                future = pool.submit(asyncio.run, _fetch_rendered_login_html(base_url))
+                rendered = future.result(timeout=30)
+            if rendered:
+                html = rendered
+        except Exception as e:
+            print(f"   ⚠️  [MEMORY] Rendered-HTML fetch failed: {e}")
+
     prompt = f"""Analyze this HTML from {base_url} and extract the login form details.
 
 HTML:
-{html[:3000]}
+{html[:5000]}
 
-Return a JSON object with exactly these keys (use null if not found):
+Return a JSON object with exactly these keys:
 {{
   "username_selector": "RF-style selector for the username/email input",
   "password_selector": "RF-style selector for the password input",
@@ -106,6 +152,14 @@ CRITICAL — for the submit control ALWAYS use:
   xpath://*[@type='submit']
 This is universal and avoids failures when the element is <input type="submit"> vs <button type="submit">.
 
+MANDATORY:
+- If you find ANY <input> or <button> tag in the HTML, you MUST return real selectors
+  derived from those tags. Do NOT return all four selectors as null.
+- Returning null is ONLY acceptable when the HTML truly contains no form-like elements.
+- Even if the HTML looks like a SPA shell, if password/username/submit elements ARE
+  present, derive selectors from them. Do NOT excuse a null answer with
+  "the form is dynamically loaded" — work with whatever is in the HTML.
+
 Return ONLY the JSON object, no markdown fences, no explanation."""
 
     try:
@@ -125,57 +179,143 @@ Return ONLY the JSON object, no markdown fences, no explanation."""
             content = content.rsplit("```", 1)[0]
         recipe = json.loads(content)
         print(f"   ✅ [MEMORY] Recipe discovered: {recipe.get('app_type', 'unknown app')}")
-        return recipe
     except Exception as e:
-        print(f"   ⚠️  [MEMORY] Could not discover recipe: {e}")
+        print(f"   ⚠️  [MEMORY] LLM recipe parse failed: {e}")
+        recipe = {}
+
+    # Fallback: when the LLM returns all-null selectors but the HTML clearly
+    # has a login form, derive selectors via regex directly.
+    keys = ("username_selector", "password_selector", "submit_selector")
+    if not recipe or all(not recipe.get(k) for k in keys):
+        regex_recipe = _derive_recipe_via_regex(html)
+        if regex_recipe:
+            print(f"   🛠️  [MEMORY] LLM gave nulls — derived recipe from HTML via regex.")
+            # Preserve any non-null fields from the LLM (app_type, notes, etc.)
+            merged = {**recipe, **regex_recipe}
+            recipe = merged
+    return recipe
+
+
+def _derive_recipe_via_regex(html: str) -> dict:
+    """
+    Best-effort selector extraction from real HTML using regex. Only used as
+    a fallback when the LLM returns all-null selectors. Returns {} if nothing
+    usable is found.
+    """
+    if not html:
         return {}
+
+    # Find the password input first — it's the most reliable anchor.
+    pwd_match = re.search(
+        r'<input\b[^>]*type=["\']password["\'][^>]*>',
+        html, re.IGNORECASE,
+    )
+    if not pwd_match:
+        return {}
+
+    def _attr(tag: str, name: str) -> str:
+        m = re.search(rf'\b{name}=["\']([^"\']+)["\']', tag, re.IGNORECASE)
+        return m.group(1) if m else ""
+
+    pwd_tag = pwd_match.group(0)
+    pwd_id = _attr(pwd_tag, "id")
+    pwd_placeholder = _attr(pwd_tag, "placeholder")
+
+    if pwd_id:
+        password_sel = f"xpath://input[@id='{pwd_id}']"
+    elif pwd_placeholder:
+        password_sel = f"xpath://input[@placeholder='{pwd_placeholder}']"
+    else:
+        password_sel = "xpath://input[@type='password']"
+
+    # Username/text input — pick the first non-password text input.
+    username_sel = ""
+    for m in re.finditer(r'<input\b[^>]*>', html, re.IGNORECASE):
+        tag = m.group(0)
+        type_attr = _attr(tag, "type").lower()
+        if type_attr in ("password", "submit", "checkbox", "radio", "hidden"):
+            continue
+        if type_attr and type_attr not in ("text", "email", "tel"):
+            continue
+        u_id = _attr(tag, "id")
+        u_placeholder = _attr(tag, "placeholder")
+        if u_id:
+            username_sel = f"xpath://input[@id='{u_id}']"
+        elif u_placeholder:
+            username_sel = f"xpath://input[@placeholder='{u_placeholder}']"
+        else:
+            username_sel = "xpath://input[@type='text']"
+        break
+
+    # Submit — universal selector works for both <input type=submit> and <button type=submit>.
+    submit_sel = "xpath://*[@type='submit']"
+
+    if not username_sel:
+        return {}
+
+    return {
+        "username_selector": username_sel,
+        "password_selector": password_sel,
+        "submit_selector": submit_sel,
+    }
 
 
 # ── Post-login page structure discovery ───────────────────────────────────────
 
 def _extract_interactive_elements(html: str) -> str:
     """
-    Extract interactive element opening tags from full page HTML.
-    Returns a compact string of button/input/select/a/option/span/div tags
-    with their IDs, classes, placeholders and visible text — much more useful
-    than a raw HTML[:4000] slice that mostly contains <head> content.
+    Extract interactive + text-bearing element opening tags from full page HTML.
+    Returns a compact string of button/input/select/a/option/h1-h6/p/label/span/div
+    tags with their IDs, classes, placeholders and visible text. Works generically
+    across React, Vue, Angular and plain server-rendered apps.
     """
     results = []
     seen: set = set()
 
-    # buttons, inputs, selects, options, links with inner text
+    # 1. Interactive controls + headings/paragraphs/labels with inner text
     for m in re.finditer(
-        r'<(button|input|select|option|a)\b([^>]{0,400}?)(/?>)((?:[^<]{0,80})?)',
+        r'<(button|input|select|option|a|h[1-6]|p|label|textarea)\b([^>]{0,400}?)(/?>)((?:[^<]{0,120})?)',
         html, re.IGNORECASE | re.DOTALL
     ):
         tag, attrs, closing, inner = m.group(1), m.group(2), m.group(3), m.group(4).strip()
-        if not re.search(r'\b(id|class|placeholder|type|value|href)\s*=', attrs, re.IGNORECASE):
+        # Inputs/buttons must have at least one identifying attr; headings/p/label are kept for their text
+        is_text_tag = tag.lower() in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'label')
+        if not is_text_tag and not re.search(
+            r'\b(id|class|placeholder|type|value|href|aria-label|data-test|name)\s*=',
+            attrs, re.IGNORECASE
+        ):
+            continue
+        # Skip purely decorative <p>/<h*> with no text
+        if is_text_tag and not inner:
             continue
         entry = f"<{tag}{attrs}{closing}"
         if inner and closing == '>':
             entry += inner + f"</{tag}>"
-        entry = entry[:300].strip()
-        key = entry[:80]
+        entry = entry[:320].strip()
+        key = entry[:90]
         if key not in seen:
             seen.add(key)
             results.append(entry)
 
-    # spans and divs with id or meaningful class + optional text
+    # 2. Spans and divs with an id/class + optional inline text
     for m in re.finditer(
-        r'<(span|div)\b([^>]{0,300}(?:id|class)=[^>]{0,200})>([^<]{0,60})',
+        r'<(span|div)\b([^>]{0,300}(?:id|class)=[^>]{0,200})>([^<]{0,80})',
         html, re.IGNORECASE | re.DOTALL
     ):
         tag, attrs, text = m.group(1), m.group(2), m.group(3).strip()
         if not re.search(r'\b(id|class)\s*=', attrs, re.IGNORECASE):
             continue
-        entry = (f"<{tag}{attrs}>" + (text if text else ""))[:300].strip()
-        key = entry[:80]
+        # Skip noisy decorative spans with no class hint or text
+        if not text and len(attrs) < 30:
+            continue
+        entry = (f"<{tag}{attrs}>" + (text if text else ""))[:320].strip()
+        key = entry[:90]
         if key not in seen:
             seen.add(key)
             results.append(entry)
 
     if results:
-        return "\n".join(results[:150])[:7000]
+        return "\n".join(results[:200])[:9000]
     return html[:4000]
 
 
@@ -210,9 +350,28 @@ def discover_page_structure(base_url: str, recipe: dict,
                     if await pwd.count() > 0:
                         await pwd.fill(password)
                     if await btn.count() > 0:
+                        pre_login_url = page.url
                         await btn.click()
                         await page.wait_for_timeout(3000)
-                        print(f"   ✅ [MEMORY] Logged in as {username}")
+
+                        # Validate that login actually succeeded — URL changed
+                        # OR the password field is no longer present.
+                        post_login_url = page.url
+                        try:
+                            still_has_password = await page.locator("input[type='password']").count() > 0
+                        except Exception:
+                            still_has_password = False
+
+                        url_changed = post_login_url.rstrip("/") != pre_login_url.rstrip("/")
+                        login_succeeded = url_changed or not still_has_password
+
+                        if not login_succeeded:
+                            print(f"   ⚠️  [MEMORY] Login appears to have FAILED — "
+                                  f"URL still {post_login_url}, password field still present.")
+                            print(f"   ⚠️  [MEMORY] Skipping page_structure cache to avoid storing the login DOM.")
+                            await browser.close()
+                            return ""
+                        print(f"   ✅ [MEMORY] Logged in as {username} — now at {post_login_url}")
 
                 html = await page.content()
                 await browser.close()
