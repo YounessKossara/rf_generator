@@ -16,8 +16,9 @@ import re as _re
 import httpx
 from tools.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
-from rf_agent.app_memory import (load_app, save_app, discover_login_recipe,
-                                  build_login_context, discover_page_structure)
+from rf_agent.app_memory import (load_app_for_generation, save_app, discover_login_recipe,
+                                  build_login_context, discover_page_structure,
+                                  discover_modules_batch, cache_enabled)
 
 
 # ── System prompt — focuses on test case BODIES only ──────────────────────────
@@ -539,6 +540,158 @@ def _fetch_page_html(url: str) -> str:
         return ""
 
 
+# ── Nav-link extraction + per-test classifier ─────────────────────────────────
+
+def _extract_nav_links(html: str) -> list:
+    """
+    Pull <a href="/..."> entries out of dashboard-DOM HTML, preserving any
+    visible label text near the anchor. Returns [(href, label), ...] deduped.
+    """
+    nav_links = []
+    if not html:
+        return nav_links
+    for m in _re.finditer(
+        r'<a\b[^>]*href=["\'](/[^"\']{3,120})["\'][^>]*>(?:[^<]{0,80})?'
+        r'(?:<[^>]+>([^<]{0,60})</[^>]+>)?',
+        html, _re.IGNORECASE | _re.DOTALL,
+    ):
+        href = m.group(1)
+        if any(href.endswith(x) for x in (".png", ".jpg", ".css", ".js")):
+            continue
+        inner = (m.group(2) or "").strip()
+        # Look for any visible text near the link (broader window)
+        near_text = m.group(0)
+        for tm in _re.finditer(r'>([A-Za-z][^<]{2,40})<', near_text):
+            inner = tm.group(1).strip()
+            break
+        # Also scan attribute values for human-readable hints
+        for tm in _re.finditer(r'(?:title|aria-label|data-text)=["\']([^"\']{2,60})["\']', m.group(0)):
+            if not inner:
+                inner = tm.group(1).strip()
+        nav_links.append((href, inner))
+    seen_h = set()
+    uniq = []
+    for href, label in nav_links:
+        if href not in seen_h:
+            seen_h.add(href)
+            uniq.append((href, label))
+    return uniq
+
+
+def _label_from_url(href: str) -> str:
+    """Best-effort human label from a URL path: '/admin/viewSystemUsers' → 'admin viewSystemUsers'."""
+    return _re.sub(r'[/_\-]+', ' ', href).strip()
+
+
+def _tc_text(tc: dict) -> str:
+    """Concatenate title + preconditions + steps into one searchable string."""
+    parts = [str(tc.get("title", "")), str(tc.get("expected", ""))]
+    pcs = tc.get("preconditions", [])
+    if isinstance(pcs, list):
+        parts.extend(str(p) for p in pcs)
+    else:
+        parts.append(str(pcs))
+    for step in tc.get("steps", []):
+        if isinstance(step, dict):
+            parts.append(str(step.get("action", "")))
+            parts.append(str(step.get("expected", "")))
+        else:
+            parts.append(str(step))
+    return " ".join(parts).lower()
+
+
+# Generic module keyword bank — apps tend to use the same vocabulary regardless
+# of brand. Each entry maps a keyword to URL-path hints. The classifier scores a
+# nav link by counting how many keyword hints land in BOTH the test text and
+# the link's URL/label.
+_MODULE_KEYWORDS = [
+    # (keyword pattern in test text, regex hint that should appear in href/label)
+    (r'\b(admin(?:istrator)?|user\s+management|user[s]?\b|gestion\s+(?:des?\s+)?utilisateur|role)', r'admin|user'),
+    (r'\b(p\.?i\.?m\.?|employ(?:e|ee|é)|personnel|hr\b|human\s+resource)', r'pim|employee|personnel'),
+    (r'\b(leave|cong[ée]|absence|holiday|vacation)', r'leave|absence'),
+    (r'\b(time(?:sheet)?|attendance|punch|feuille\s+de\s+temps|pointage)', r'time|attendance|timesheet'),
+    (r'\b(recruit(?:ment)?|candidate|candidat|vacanc(?:y|ies)|application)', r'recruit|candidate|vacancy'),
+    (r'\b(performance|review|appraisal|kpi|objectif)', r'performance|review'),
+    (r'\b(directory|annuaire|org[\s-]?chart)', r'directory|org'),
+    (r'\b(buzz|feed|news\s*feed|social|post|publication)', r'buzz|feed|social'),
+    (r'\b(dashboard|tableau\s+de\s+bord|home\s*page)', r'dashboard|home'),
+    (r'\b(claim|frais|expense|reimburs)', r'claim|expense'),
+    (r'\b(maintenance|nettoyage|purge)', r'maintenance'),
+    (r'\b(report|rapport|statistic|analytics)', r'report|analytic'),
+    (r'\b(my\s+info|profile|profil|mes\s+infos)', r'myinfo|profile|mydetails'),
+    (r'\b(setting|config|param[èe]tre)', r'setting|config'),
+]
+
+
+def _classify_test_to_module(tc: dict, nav_links: list, base_root: str) -> str:
+    """
+    Decide which nav link a test most likely targets. Returns absolute URL or "".
+    Score = direct keyword match between test text and link URL/label.
+    """
+    if not nav_links:
+        return ""
+    text = _tc_text(tc)
+    if not text.strip():
+        return ""
+
+    best_score = 0
+    best_url = ""
+
+    for href, label in nav_links:
+        href_l = href.lower()
+        label_l = (label or "").lower()
+        url_text = (label_l + " " + _label_from_url(href_l)).strip()
+        score = 0
+
+        # Direct label substring match in test text (strong signal)
+        if label_l and len(label_l) >= 3 and label_l in text:
+            score += 4
+        # Generic keyword bank
+        for kw_pat, url_hint_pat in _MODULE_KEYWORDS:
+            if _re.search(kw_pat, text, _re.IGNORECASE) and _re.search(url_hint_pat, url_text, _re.IGNORECASE):
+                score += 3
+        # Word-by-word URL-segment match (handles vendor-specific paths)
+        for seg in _re.findall(r'[a-z]{4,}', _label_from_url(href_l)):
+            if _re.search(rf'\b{_re.escape(seg)}', text, _re.IGNORECASE):
+                score += 1
+
+        if score > best_score:
+            best_score = score
+            best_url = href
+
+    if best_url and best_score >= 3:
+        return base_root + best_url if best_url.startswith("/") else best_url
+    return ""
+
+
+def _inject_go_to(test_body: str, target_url: str) -> str:
+    """
+    Ensure a `Go To <target_url>` step is present right after `Open App And Login`
+    when the test needs to be on a sub-module page. Idempotent — does nothing
+    if a Go To with the same URL is already present.
+    """
+    if not target_url:
+        return test_body
+    # Already navigates to this URL?
+    if _re.search(rf'(?im)^\s*Go To\s+{_re.escape(target_url)}\s*$', test_body):
+        return test_body
+    # Already navigates somewhere — trust the LLM's choice rather than overriding.
+    if _re.search(r'(?im)^\s*Go To\s+\S+', test_body):
+        return test_body
+
+    lines = test_body.split("\n")
+    new_lines = []
+    injected = False
+    for line in lines:
+        new_lines.append(line)
+        if not injected and _re.match(r'^\s*Open App And Login\b', line, _re.IGNORECASE):
+            indent = _re.match(r'^(\s*)', line).group(1)
+            new_lines.append(f"{indent}Go To    {target_url}")
+            new_lines.append(f"{indent}Sleep    2s")
+            injected = True
+    return "\n".join(new_lines)
+
+
 # ── Main generator ─────────────────────────────────────────────────────────────
 
 def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") -> str:
@@ -560,8 +713,11 @@ def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") ->
     default_user, default_pass = _extract_default_credentials(test_cases, raw_md=raw_md)
 
     # ── Step 1: Recipe ─────────────────────────────────────────────────────────
-    print("   📚 Checking app memory...")
-    stored = load_app(base_url)
+    if cache_enabled():
+        print("   📚 [MEMORY] RF_USE_CACHE=1 — reading cached recipe if available...")
+    else:
+        print("   🔄 [MEMORY] Cache disabled (default) — fresh discovery this run.")
+    stored = load_app_for_generation(base_url)
     # Use whatever is stored (even with null selectors — _build_header has fallbacks)
     recipe = stored if stored else {}
 
@@ -603,6 +759,38 @@ def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") ->
                 print("   ⚠️  [MEMORY] Post-login discovery failed — LLM will rely on text-based fallback selectors.")
         else:
             print("   ⚠️  Could not extract credentials — no HTML context for selector derivation.")
+
+    # ── Step 1c: Multi-module reconnaissance ───────────────────────────────────
+    # Extract nav links from the dashboard, classify each test, then visit every
+    # unique target page in ONE Playwright session. This ends the "single-DOM
+    # starvation" problem — the LLM gets the actual DOM of each sub-page.
+    base_root = _re.sub(r'/[a-z]+/index\.php/.*$', '', base_url, flags=_re.IGNORECASE)
+    base_root = _re.sub(r'/+$', '', base_root)  # strip trailing slash
+    nav_links = _extract_nav_links(page_html)
+
+    test_to_module: dict = {}            # tc_id -> absolute url
+    module_dom: dict = {}                # absolute_url -> compact dom
+    if nav_links:
+        unique_modules = set()
+        for tc in test_cases:
+            mod_url = _classify_test_to_module(tc, nav_links, base_root)
+            tc_id = tc.get("id", "")
+            if mod_url and tc_id:
+                test_to_module[tc_id] = mod_url
+                unique_modules.add(mod_url)
+
+        if unique_modules and default_user and default_pass:
+            print(f"   🧭 [MEMORY] Classified {len(test_to_module)}/{len(test_cases)} tests "
+                  f"to {len(unique_modules)} unique sub-page(s).")
+            module_dom = discover_modules_batch(
+                base_url, recipe, default_user, default_pass, sorted(unique_modules)
+            )
+            # If multi-module recon picked up a fresh dashboard DOM, prefer it.
+            fresh_dashboard = module_dom.get("__dashboard__", "")
+            if fresh_dashboard and not _looks_like_login_page(fresh_dashboard):
+                page_html = fresh_dashboard
+        elif not (default_user and default_pass):
+            print("   ⚠️  [MEMORY] No credentials — skipping multi-module reconnaissance.")
 
     # ── Step 2: Build the file header in Python ────────────────────────────────
     header = _build_header(base_url, recipe)
@@ -647,12 +835,26 @@ def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") ->
     batches = [test_cases[i:i + batch_size] for i in range(0, len(test_cases), batch_size)]
     all_test_bodies = ""
 
+    # Build the global nav-links hint once (small, shared across batches)
+    nav_hint = ""
+    if nav_links:
+        nav_lines = [f"  Go To    {base_root}{href}    # {label or '(no label)'}"
+                     for href, label in nav_links[:25]]
+        nav_hint = (
+            "\nKNOWN INTERNAL NAVIGATION LINKS (use Go To with the absolute URL "
+            "when the test needs to be on a sub-module page):\n"
+            + "\n".join(nav_lines)
+            + "\n"
+        )
+
     for idx, batch in enumerate(batches):
         print(f"   🤖 Generating batch {idx + 1}/{len(batches)} ({len(batch)} tests)...")
 
         tc_text_parts = []
+        per_test_dom_parts = []
         for tc in batch:
-            part = f"ID: {tc['id']} | Title: {tc['title']}\n"
+            tc_id = tc.get("id", "")
+            part = f"ID: {tc_id} | Title: {tc.get('title','')}\n"
             if tc.get("preconditions"):
                 pc_lines = tc["preconditions"]
                 if isinstance(pc_lines, list):
@@ -672,64 +874,45 @@ def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") ->
                         part += f"  {i}. {step}\n"
             if tc.get("expected"):
                 part += f"Expected result: {tc['expected']}\n"
+
+            # Inline the per-test target URL so the LLM sees it next to the test
+            mod_url = test_to_module.get(tc_id, "")
+            if mod_url:
+                part += f"TARGET PAGE URL: {mod_url}\n"
+                part += (f"  → First action after Open App And Login MUST be: "
+                         f"Go To    {mod_url}\n")
             tc_text_parts.append(part)
+
+            # Build a per-test DOM block ONLY when we have a real sub-page DOM
+            tc_dom = module_dom.get(mod_url, "") if mod_url else ""
+            if tc_dom:
+                per_test_dom_parts.append(
+                    f"--- DOM for {tc_id} ({mod_url}) ---\n{tc_dom[:1800]}"
+                )
 
         batch_tcs_text = "\n".join(tc_text_parts)
 
-        html_context_block = ""
-        nav_hint = ""
-        if page_html:
-            # Extract <a href="..."> links that look like internal module navigation.
-            nav_links = []
-            for m in _re.finditer(
-                r'<a\b[^>]*href=["\'](/[^"\']{3,120})["\'][^>]*>(?:[^<]{0,80})?'
-                r'(?:<[^>]+>([^<]{0,60})</[^>]+>)?',
-                page_html, _re.IGNORECASE | _re.DOTALL,
-            ):
-                href = m.group(1)
-                # Skip pure asset / external paths
-                if any(href.endswith(x) for x in (".png", ".jpg", ".css", ".js")):
-                    continue
-                inner = (m.group(2) or "").strip()
-                # Look for any visible text near the link
-                near_text = m.group(0)
-                for tm in _re.finditer(r'>([A-Za-z][^<]{2,40})<', near_text):
-                    inner = tm.group(1).strip()
-                    break
-                nav_links.append((href, inner))
-            # Deduplicate
-            seen_h = set()
-            uniq_links = []
-            for href, label in nav_links:
-                if href not in seen_h:
-                    seen_h.add(href)
-                    uniq_links.append((href, label))
-            if uniq_links:
-                nav_lines = [f"  Go To    {{base}}{href}    # {label or '(no label)'}"
-                             for href, label in uniq_links[:25]]
-                # Strip /web/index.php/auth/login from the example base
-                base_root = _re.sub(r'/[a-z]+/index\.php/.*$', '', base_url, flags=_re.IGNORECASE)
-                nav_hint = (
-                    f"\nKNOWN INTERNAL NAVIGATION LINKS (use Go To with the absolute URL "
-                    f"to navigate to a module if the test's preconditions require it):\n"
-                    + "\n".join(line.replace("{base}", base_root) for line in nav_lines)
-                    + "\n"
-                )
+        per_test_dom_block = ""
+        if per_test_dom_parts:
+            per_test_dom_block = (
+                "\nPER-TEST PAGE DOM (real DOM captured by Playwright at the target URL):\n"
+                + "\n".join(per_test_dom_parts)
+                + "\n"
+            )
 
+        html_context_block = ""
+        if page_html:
             html_context_block = f"""
-PAGE HTML (real DOM from {base_url} after login — derive ALL selectors from this):
-{page_html[:4500]}
-{nav_hint}
-MANDATORY: Use ONLY selectors that exist in the HTML above.
-Look at @id, @class, @placeholder, button text, link text, aria-label in the HTML.
-NEVER invent a selector that is not present in this HTML.
-If a test's PRECONDITIONS state the user is on a specific module page (e.g.
-"on the user-management page", "on the employee-list page", "on recruitment page"),
-the FIRST step of the test body (after Open App And Login) must NAVIGATE there
-using either `Go To    <module-url>` (preferred when the URL is in the
-KNOWN INTERNAL NAVIGATION LINKS list) or by clicking the matching menu link.
-Do NOT assume the user already is on that page — they are on the post-login
-landing page (the dashboard) until you navigate.
+DASHBOARD DOM (post-login landing page from {base_url}):
+{page_html[:3500]}
+{nav_hint}{per_test_dom_block}
+SELECTOR DERIVATION RULES:
+- For each test, derive selectors from its PER-TEST PAGE DOM (above) when one exists.
+- For tests without a per-test DOM block, use the DASHBOARD DOM.
+- NEVER invent a class/id/data-test attribute that is not present in the DOM you were given.
+- When the test requires a specific sub-module page, the FIRST step after
+  Open App And Login MUST be `Go To <TARGET PAGE URL>` (already supplied above).
+- After Go To, add `Sleep 2s` so the SPA can render before you interact.
 """
 
         # Use the actual extracted creds in the example so the LLM does not
@@ -751,22 +934,21 @@ MANDATORY RULES:
     TC-006 Some test title
         [Documentation]    ...
         Open App And Login    {ex_user}    {ex_pass}
+        Go To    <TARGET PAGE URL if the test specifies one>
+        Sleep    2s
         Wait Until Element Is Visible    <selector for the FEATURE BEING TESTED>    15s
         ...
         Capture Page Screenshot    TC-006_final.png
 - For EVERY test that needs a logged-in session, use Open App And Login with
-  {ex_user} / {ex_pass} — UNLESS the test description specifies different credentials
-  (e.g. invalid-credentials tests).
+  {ex_user} / {ex_pass} — UNLESS the test description specifies different credentials.
 - For tests that check unauthenticated access only, use Open Browser Only.
 - Do NOT write Open Browser, Set Window Size, or login input steps — they are in the keyword.
 - Do NOT write Close Browser — Test Teardown handles it automatically.
-- Do NOT add a Wait/Page Should Contain for the success indicator right after Open App And Login —
-  the keyword has already waited for it. Move directly to the test-specific action.
+- Do NOT add a Wait/Page Should Contain for the success indicator right after Open App And Login.
 - Use Wait Until Element Is Visible (15s) before every element interaction (except <select>).
-- Derive selectors from the PAGE HTML provided above — never guess class names.
-- For features NOT visible in the PAGE HTML (e.g. requires navigating somewhere first),
-  use a TEXT-based xpath like `xpath://*[contains(normalize-space(),'Quick Launch')]`
-  rather than inventing class names.
+- Derive selectors from the PER-TEST PAGE DOM (or the dashboard DOM as fallback) — never guess.
+- For features absent from BOTH DOM blocks, use a TEXT-based xpath like
+  `xpath://*[contains(normalize-space(),'Some Visible Text')]`.
 - Take screenshots for test-specific actions with the TC ID prefix (e.g. TC-006_final.png).
 - Return ONLY the test case code, no markdown fences, no explanations."""
 
@@ -787,7 +969,43 @@ MANDATORY RULES:
         # Strip stray section headers, column-0 tags, separators
         batch_code = _clean_batch_code(batch_code)
 
+        # Belt-and-suspenders: even if the LLM forgot, force-inject Go To for
+        # tests that we know target a sub-module URL.
+        batch_code = _enforce_go_to_per_test(batch_code, batch, test_to_module)
+
         all_test_bodies += "\n" + batch_code.strip() + "\n"
 
     # ── Step 4: Assemble final file ────────────────────────────────────────────
     return header + "\n" + all_test_bodies.strip()
+
+
+def _enforce_go_to_per_test(batch_code: str, batch: list, test_to_module: dict) -> str:
+    """
+    For each test in the batch with a known target module URL, ensure the
+    generated body contains a `Go To <url>` step right after `Open App And Login`.
+    Idempotent: skips tests that already navigate.
+    """
+    if not test_to_module:
+        return batch_code
+    lines = batch_code.split("\n")
+    test_starts = [i for i, ln in enumerate(lines)
+                   if _re.match(r'^TC-\d+', ln.strip()) and not (ln.startswith(" ") or ln.startswith("\t"))]
+    if not test_starts:
+        return batch_code
+    test_starts.append(len(lines))
+
+    fixed = lines[: test_starts[0]] if test_starts else lines[:]
+    for i in range(len(test_starts) - 1):
+        start, end = test_starts[i], test_starts[i + 1]
+        block = "\n".join(lines[start:end])
+        # Find the matching test case by ID
+        m = _re.match(r'^(TC-\d+)', lines[start].strip())
+        if not m:
+            fixed.extend(lines[start:end])
+            continue
+        tc_id = m.group(1)
+        target = test_to_module.get(tc_id, "")
+        if target:
+            block = _inject_go_to(block, target)
+        fixed.extend(block.split("\n"))
+    return "\n".join(fixed)

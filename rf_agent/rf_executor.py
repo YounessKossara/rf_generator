@@ -26,6 +26,7 @@ from rf_agent.self_healer import (
     _needs_login,
     _extract_credentials_from_rf,
     _extract_target_url,
+    _extract_all_navigation_urls,
 )
 from rf_agent.app_memory import load_app
 
@@ -210,13 +211,20 @@ async def execute_rf(rf_code: str, test_name: str) -> dict:
                 # 2. Smart page fetch — login if TC needs post-login DOM
                 login_needed = _needs_login(tc_block, app_recipe.get("success_indicator", ""))
                 username, password = _extract_credentials_from_rf(tc_block)
-                target_url = _extract_target_url(tc_block)
+                nav_urls = _extract_all_navigation_urls(tc_block)
+                target_url = nav_urls[-1] if nav_urls else _extract_target_url(tc_block)
 
-                print(f"🔍 [HEALER] Fetching DOM from {base_url} (login={'yes' if login_needed else 'no'})...")
+                if nav_urls:
+                    print(f"🔍 [HEALER] Fetching DOM at FAILURE PAGE ({target_url}) "
+                          f"after login={'yes' if login_needed else 'no'}...")
+                else:
+                    print(f"🔍 [HEALER] Fetching DOM from {base_url} (no Go To in test, "
+                          f"using post-login landing page) login={'yes' if login_needed else 'no'}...")
                 page_html = await fetch_page_html(
                     base_url, needs_login=login_needed,
                     username=username, password=password,
                     target_url=target_url,
+                    nav_urls=nav_urls,
                     login_recipe=app_recipe
                 )
 
