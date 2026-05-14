@@ -137,13 +137,22 @@ def _extract_target_url(tc_rf_code: str) -> str:
 
 
 def _extract_all_navigation_urls(tc_rf_code: str) -> list:
-    """All navigation URLs in the order they appear — replay these on heal."""
+    """All navigation URLs in the order they appear — replay these on heal.
+
+    Resolves ${BASE_URL} from the test's Variables section so the healer can
+    actually hit the page where the test failed instead of handing literal
+    '${BASE_URL}/...' to Playwright.
+    """
+    base_url = extract_base_url_from_rf_code(tc_rf_code)
     urls = []
     for line in tc_rf_code.split("\n"):
         stripped = line.strip()
         m = re.match(r'^(?:Go\s+To|Navigate\s+To)\s+(\S+)', stripped, re.IGNORECASE)
         if m:
-            urls.append(m.group(1).strip())
+            raw = m.group(1).strip()
+            if base_url and "${BASE_URL}" in raw:
+                raw = raw.replace("${BASE_URL}", base_url)
+            urls.append(raw)
     return urls
 
 

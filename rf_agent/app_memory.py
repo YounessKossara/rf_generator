@@ -220,7 +220,90 @@ Return ONLY the JSON object, no markdown fences, no explanation."""
             # Preserve any non-null fields from the LLM (app_type, notes, etc.)
             merged = {**recipe, **regex_recipe}
             recipe = merged
+
+    # DOM-grounded sanity check: XPath is CASE-SENSITIVE, so a selector with
+    # `@placeholder='username'` will NEVER match an input with `placeholder="Username"`.
+    # The LLM sometimes lower-cases attribute values when reading from HTML.
+    # If any of the LLM's selector VALUES (placeholder/id/class/etc.) does not
+    # appear VERBATIM (case-sensitive) in the actual HTML, override that
+    # individual selector with the regex-derived one.
+    if recipe and html:
+        bad = []
+        for k in keys:
+            sel = recipe.get(k, "")
+            if sel and not _selector_grounded_in_html(sel, html):
+                bad.append(k)
+        if bad:
+            regex_recipe = _derive_recipe_via_regex(html)
+            if regex_recipe:
+                print(f"   🛠️  [MEMORY] LLM selectors not grounded in HTML "
+                      f"(case mismatch / hallucinated value): {bad} — "
+                      f"overriding with regex-derived selectors.")
+                for k in bad:
+                    if regex_recipe.get(k):
+                        recipe[k] = regex_recipe[k]
     return recipe
+
+
+def _selector_grounded_in_html(rf_sel: str, html: str) -> bool:
+    """
+    Verify the distinguishing literals in a recipe selector appear in the HTML
+    AS THE SAME ATTRIBUTE (case-sensitive — XPath is case-sensitive).
+
+      `@placeholder='username'`  must find  `placeholder="username"` in HTML
+      `@class='foo'`             must find  class containing word `foo`
+      `@type='submit'`           generic — case-insensitive substring is enough
+
+    Substring-anywhere checks are NOT enough: e.g. `'username'` appears in
+    `name="username"` even when the placeholder attribute is `"Username"`.
+    Returns False when at least one literal is missing FROM ITS ATTRIBUTE.
+    """
+    if not rf_sel or not html:
+        return True
+
+    def _attr_has_value(attr: str, value: str) -> bool:
+        if attr == "type":
+            # Generic types ('submit', 'password', etc.) — case-insensitive,
+            # location-agnostic substring is enough.
+            return value.lower() in html.lower()
+        if attr == "class":
+            # `class` may have multiple space-separated tokens; the literal
+            # must appear as a whole token within a class="..." attribute.
+            pattern = (rf'class\s*=\s*[\'"][^\'"]*\b'
+                       rf'{re.escape(value)}\b[^\'"]*[\'"]')
+            return re.search(pattern, html) is not None
+        # placeholder / id / data-test / name / aria-label — case-sensitive
+        # exact value, within the SAME attribute in HTML.
+        pattern = rf'\b{attr}\s*=\s*[\'"]{re.escape(value)}[\'"]'
+        return re.search(pattern, html) is not None
+
+    # Form A: @attr='value' — exact attribute equals value
+    for m in re.finditer(
+        r"@(class|id|placeholder|data-test|data-testid|aria-label|name|type)\s*=\s*['\"]([^'\"]+)['\"]",
+        rf_sel,
+    ):
+        attr, value = m.group(1), m.group(2).strip()
+        if value and not _attr_has_value(attr, value):
+            return False
+    # Form B: contains(@attr,'value') — value must appear inside the same attribute
+    for m in re.finditer(
+        r"contains\(\s*@(class|id|placeholder|data-test|data-testid|name|aria-label)\s*,\s*['\"]([^'\"]+)['\"]\s*\)",
+        rf_sel,
+    ):
+        attr, value = m.group(1), m.group(2).strip()
+        if not value:
+            continue
+        if attr == "class":
+            pattern = (rf'class\s*=\s*[\'"][^\'"]*'
+                       rf'{re.escape(value)}[^\'"]*[\'"]')
+            if re.search(pattern, html) is None:
+                return False
+        else:
+            pattern = (rf'\b{attr}\s*=\s*[\'"][^\'"]*'
+                       rf'{re.escape(value)}[^\'"]*[\'"]')
+            if re.search(pattern, html) is None:
+                return False
+    return True
 
 
 def _derive_recipe_via_regex(html: str) -> dict:
@@ -379,7 +462,25 @@ def discover_page_structure(base_url: str, recipe: dict,
                     if await btn.count() > 0:
                         pre_login_url = page.url
                         await btn.click()
-                        await page.wait_for_timeout(3000)
+
+                        # Wait for REAL navigation rather than a fixed sleep.
+                        # SPA redirects can take >3s under load; using
+                        # wait_for_url with a sensible timeout + network-idle
+                        # wait removes the race where we captured the page
+                        # BEFORE Vue.js redirected to the dashboard.
+                        try:
+                            await page.wait_for_url(
+                                lambda u: ("auth/login" not in u
+                                           and u.rstrip("/") != pre_login_url.rstrip("/")),
+                                timeout=10000,
+                            )
+                        except Exception:
+                            pass  # didn't navigate — login probably failed
+                        try:
+                            await page.wait_for_load_state("networkidle", timeout=10000)
+                        except Exception:
+                            pass
+                        await page.wait_for_timeout(1500)
 
                         # Validate that login actually succeeded — URL changed
                         # OR the password field is no longer present.
@@ -419,6 +520,14 @@ def discover_page_structure(base_url: str, recipe: dict,
         return ""
 
     compact = _extract_interactive_elements(full_html)
+    # Suspiciously-tiny DOM means Playwright captured before the SPA mounted,
+    # OR login silently failed leaving us on a near-empty shell. Either way,
+    # caching this would produce a useless context for the LLM. Return "" so
+    # the caller can fall back to its no-DOM behavior.
+    if len(compact) < 400:
+        print(f"   ⚠️  [MEMORY] Captured page_structure is only {len(compact)} chars — "
+              f"too small to be useful (likely race / SPA not mounted). Not caching.")
+        return ""
     save_app(base_url, {"page_structure": compact})
     print(f"   💾 [MEMORY] Saved page_structure for {_domain_key(base_url)} ({len(compact)} chars)")
     return compact
@@ -480,7 +589,20 @@ def discover_modules_batch(
                         pre_url = page.url
                         if await btn.count() > 0:
                             await btn.click()
-                            await page.wait_for_timeout(3000)
+                            # Wait for REAL navigation (no fixed 3s race).
+                            try:
+                                await page.wait_for_url(
+                                    lambda u: ("auth/login" not in u
+                                               and u.rstrip("/") != pre_url.rstrip("/")),
+                                    timeout=10000,
+                                )
+                            except Exception:
+                                pass
+                            try:
+                                await page.wait_for_load_state("networkidle", timeout=10000)
+                            except Exception:
+                                pass
+                            await page.wait_for_timeout(1500)
                             try:
                                 still_pwd = await page.locator("input[type='password']").count() > 0
                             except Exception:
@@ -488,7 +610,7 @@ def discover_modules_batch(
                             url_changed = page.url.rstrip("/") != pre_url.rstrip("/")
                             login_ok = url_changed or not still_pwd
                             if login_ok:
-                                print(f"   ✅ [MEMORY] Logged in as {username}")
+                                print(f"   ✅ [MEMORY] Logged in as {username} — at {page.url}")
                             else:
                                 print(f"   ⚠️  [MEMORY] Login appears to have FAILED — "
                                       f"URL still {page.url}.")
@@ -531,6 +653,135 @@ def discover_modules_batch(
             return future.result(timeout=180)
     except Exception as e:
         print(f"   ⚠️  [MEMORY] Multi-module discovery timed out / failed: {e}")
+        return {}
+
+
+# ── Catalog-based discovery (Phase A — new path; runs alongside legacy) ──────
+
+def discover_catalogs_batch(base_url: str, recipe: dict,
+                            username: str, password: str,
+                            module_urls: list) -> dict:
+    """
+    Phase A's catalog-producing companion to `discover_modules_batch`. One
+    Playwright session: log in once, then walk each module URL and run the
+    DOM catalog extractor. Returns:
+
+        {
+            "__login__":     <catalog of the login page>,
+            "__dashboard__": <catalog of the post-login landing page>,
+            "<module_url>":  <catalog>,  ...
+        }
+
+    Empty dict on Playwright failure. Caller (rf_generator) should treat an
+    empty dict as "fall back to the legacy raw-HTML path" — Phase A's safety
+    net invariant.
+    """
+    print(f"   📚 [CATALOG] Building catalogs for login + dashboard + "
+          f"{len(module_urls)} sub-page(s)...")
+
+    async def _run() -> dict:
+        try:
+            from playwright.async_api import async_playwright
+            from rf_agent.dom_catalog import extract_catalog
+        except Exception as e:
+            print(f"   ⚠️  [CATALOG] dependencies unavailable: {e}")
+            return {}
+
+        results: dict = {}
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                ctx = await browser.new_context()
+                page = await ctx.new_page()
+                await page.goto(base_url, timeout=20000)
+
+                # Wait for the SPA to actually mount the login form before
+                # extracting the catalog. Use the password field's visibility
+                # as the readiness signal (most reliable across frameworks).
+                try:
+                    pwd_sel = rf_to_playwright(recipe.get("password_selector", "")) or "input[type='password']"
+                    await page.locator(pwd_sel).first.wait_for(state="visible", timeout=10000)
+                except Exception:
+                    # Generic fallback wait if the recipe selector doesn't match
+                    await page.wait_for_timeout(3500)
+                await page.wait_for_timeout(500)  # final settle
+
+                # Login-page catalog BEFORE clicking submit
+                try:
+                    results["__login__"] = await extract_catalog(page)
+                    print(f"   ✅ [CATALOG] Login page: {len(results['__login__']['elements'])} elements")
+                except Exception as e:
+                    print(f"   ⚠️  [CATALOG] Login-page extraction failed: {e}")
+
+                # Login
+                login_ok = False
+                if username and password:
+                    usr_sel = rf_to_playwright(recipe.get("username_selector", "")) or "input[type='text']"
+                    pwd_sel = rf_to_playwright(recipe.get("password_selector", "")) or "input[type='password']"
+                    btn_sel = rf_to_playwright(recipe.get("submit_selector", "")) or "button[type='submit']"
+                    try:
+                        pre_url = page.url
+                        await page.locator(usr_sel).first.fill(username)
+                        await page.locator(pwd_sel).first.fill(password)
+                        await page.locator(btn_sel).first.click()
+                        try:
+                            await page.wait_for_url(
+                                lambda u: ("auth/login" not in u
+                                           and u.rstrip("/") != pre_url.rstrip("/")),
+                                timeout=10000,
+                            )
+                        except Exception:
+                            pass
+                        try:
+                            await page.wait_for_load_state("networkidle", timeout=10000)
+                        except Exception:
+                            pass
+                        await page.wait_for_timeout(1500)
+                        try:
+                            still_pwd = await page.locator("input[type='password']").count() > 0
+                        except Exception:
+                            still_pwd = False
+                        login_ok = (page.url.rstrip("/") != pre_url.rstrip("/")) or not still_pwd
+                        if login_ok:
+                            print(f"   ✅ [CATALOG] Logged in as {username} — at {page.url}")
+                    except Exception as e:
+                        print(f"   ⚠️  [CATALOG] Login step error: {e}")
+
+                # Dashboard catalog (whatever page we land on)
+                if login_ok:
+                    try:
+                        results["__dashboard__"] = await extract_catalog(page)
+                        print(f"   ✅ [CATALOG] Dashboard: "
+                              f"{len(results['__dashboard__']['elements'])} elements, "
+                              f"{len(results['__dashboard__']['nav'])} nav links")
+                    except Exception as e:
+                        print(f"   ⚠️  [CATALOG] Dashboard extraction failed: {e}")
+
+                    # Module-page catalogs
+                    for url in module_urls:
+                        try:
+                            print(f"   🔗 [CATALOG] Visiting {url}")
+                            await page.goto(url, timeout=20000, wait_until="networkidle")
+                            await page.wait_for_timeout(1500)
+                            cat = await extract_catalog(page)
+                            results[url] = cat
+                            print(f"   ✅ [CATALOG] Captured {url} "
+                                  f"({len(cat['elements'])} elements)")
+                        except Exception as e:
+                            print(f"   ⚠️  [CATALOG] Failed to capture {url}: {e}")
+                            results[url] = {}
+
+                await browser.close()
+        except Exception as e:
+            print(f"   ⚠️  [CATALOG] session error: {e}")
+        return results
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            future = pool.submit(asyncio.run, _run())
+            return future.result(timeout=180)
+    except Exception as e:
+        print(f"   ⚠️  [CATALOG] outer wrapper failed: {e}")
         return {}
 
 
