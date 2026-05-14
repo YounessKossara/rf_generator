@@ -299,6 +299,7 @@ def _build_header(base_url: str, recipe: dict) -> str:
     return (
         "*** Settings ***\n"
         "Library    SeleniumLibrary\n"
+        "Library    String\n"
         # Phase B: runtime selector remap library — imports `heal_selector_by_label`
         # as a Robot keyword. NO LLM at runtime; pure browser-side JS.
         "Library    rf_agent.healer_runtime\n"
