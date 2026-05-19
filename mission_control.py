@@ -53,6 +53,29 @@ async def update_status(status: str):
         pass
 
 
+async def upload_to_agent_memory(file_name: str, content: str):
+    """Envoie un fichier dans la mémoire globale de Mission Control."""
+    path = f"agents/{AGENT_NAME}/{file_name}"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            # 1. Action 'create' pour forcer la création des dossiers parents
+            await client.post(
+                f"{MC_BASE_URL}/api/memory",
+                headers={"Authorization": f"Bearer {MC_API_KEY}"},
+                json={"path": path, "content": "", "action": "create"}
+            )
+            # 2. Action 'save' pour uploader le vrai contenu
+            res = await client.post(
+                f"{MC_BASE_URL}/api/memory",
+                headers={"Authorization": f"Bearer {MC_API_KEY}"},
+                json={"path": path, "content": content, "action": "save"}
+            )
+            res.raise_for_status()
+            print(f"📁 Fichier {file_name} synchronisé dans la mémoire MC")
+    except Exception as e:
+        print(f"⚠️ Erreur sync mémoire : {e}")
+
+
 async def create_task(title: str, description: str,
                       assigned_to: str, priority: str = "high"):
     """Create a task in MC for another agent (handoff)."""
@@ -79,11 +102,10 @@ async def complete_task(task_id: int, results: dict):
     """Mark a task as review with results."""
     try:
         async with httpx.AsyncClient(timeout=5) as client:
-            await client.put(
-                f"{MC_BASE_URL}/api/tasks",
+            res = await client.put(
+                f"{MC_BASE_URL}/api/tasks/{task_id}",
                 headers={"Authorization": f"Bearer {MC_API_KEY}"},
                 json={
-                    "id": task_id,
                     "status": "review",
                     "resolution": json.dumps(
                         {
@@ -98,6 +120,7 @@ async def complete_task(task_id: int, results: dict):
                     ),
                 },
             )
+            res.raise_for_status()
             print(f"✅ MC Task {task_id} marked as review")
     except Exception as e:
         print(f"⚠️ Could not complete MC task {task_id}: {e}")
@@ -174,12 +197,44 @@ async def handle_incoming_task(task_id: int):
         return
 
     print("📬 Pipeline task received → starting RF pipeline")
+    
+    await update_status("busy")
 
-    req = RFRequest(markdown_content=md_content, base_url=base_url)
-    results = await generate_rf(req)
+    # Passer la tâche en in_progress
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            await client.put(
+                f"{MC_BASE_URL}/api/tasks/{task_id}",
+                headers={"Authorization": f"Bearer {MC_API_KEY}"},
+                json={"status": "in_progress"}
+            )
+    except Exception:
+        pass
 
-    if task_id:
-        await complete_task(task_id, results)
+    try:
+        req = RFRequest(markdown_content=md_content, base_url=base_url)
+        results = await generate_rf(req)
+
+        if task_id:
+            await complete_task(task_id, results)
+            
+            # Synchronisation du fichier généré dans la mémoire de Mission Control
+            if "rf_code" in results and "test_name" in results:
+                await upload_to_agent_memory(f"{results['test_name']}.robot", results["rf_code"])
+    except Exception as e:
+        print(f"⚠️ Erreur lors du traitement de la tâche {task_id}: {e}")
+        if task_id:
+            try:
+                async with httpx.AsyncClient(timeout=5) as client:
+                    await client.put(
+                        f"{MC_BASE_URL}/api/tasks/{task_id}",
+                        headers={"Authorization": f"Bearer {MC_API_KEY}"},
+                        json={"status": "failed", "error_message": str(e)}
+                    )
+            except Exception:
+                pass
+    finally:
+        await update_status("idle")
 
     # Phase 2 parallèle : test_agent est déclenché par use_cases_agent, pas de handoff RF → Playwright ici.
 

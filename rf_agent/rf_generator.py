@@ -660,7 +660,10 @@ def _downgrade_to_text_locator(line: str, fallback_text: str) -> str:
         return line  # nothing safe to fall back to — leave as-is
     safe_text = fallback_text.replace("'", "")
     new_locator = f"xpath://*[contains(normalize-space(),'{safe_text}')]"
-    return _re.sub(r"(xpath:|css:)[^\s]+", new_locator, line, count=1)
+    # \S+(?:[ ]\S+)* matches the full locator including single spaces inside
+    # quoted attribute values (e.g. @placeholder='Employee Name'), stopping at
+    # RF's argument separator (2+ spaces) — unlike [^\s]+ which stops too early.
+    return _re.sub(r"(xpath:|css:)\S+(?:[ ]\S+)*", new_locator, line, count=1)
 
 
 def _validate_selectors_against_dom(test_body: str, dom_blob: str) -> str:
@@ -1426,6 +1429,8 @@ def _validate_plan_against_catalog(plan: dict, catalog: dict) -> bool:
             return False
         if nid and nid not in navs:
             return False
+        if kw == "input" and step.get("value") is None:
+            return False
     return True
 
 
@@ -1558,6 +1563,28 @@ def generate_rf_code(test_cases: list[dict], base_url: str, raw_md: str = "") ->
         module_catalogs = discover_catalogs_batch(
             base_url, recipe, default_user, default_pass, sorted(unique_modules)
         )
+        # Fallback for SPAs where page_html was too small to extract nav links
+        # (e.g. Vue.js apps not yet mounted at fetch time).
+        # Guard: only fires when nav_links is empty AND unique_modules is still
+        # empty. SauceDemo always has non-empty nav_links from its page_html,
+        # so this block is unreachable for SauceDemo.
+        if not nav_links and not unique_modules:
+            catalog_nav = module_catalogs.get("__dashboard__", {}).get("nav", [])
+            if catalog_nav:
+                catalog_nav_links = [(n["href"], n.get("label", "")) for n in catalog_nav]
+                for tc in test_cases:
+                    mod_url = _classify_test_to_module(tc, catalog_nav_links, base_root)
+                    tc_id = tc.get("id", "")
+                    if mod_url and tc_id:
+                        test_to_module[tc_id] = mod_url
+                        unique_modules.add(mod_url)
+                if unique_modules:
+                    print(f"   🧭 [MEMORY] Fallback: classified {len(test_to_module)}/"
+                          f"{len(test_cases)} tests via catalog nav links.")
+                    sub_catalogs = discover_catalogs_batch(
+                        base_url, recipe, default_user, default_pass, sorted(unique_modules)
+                    )
+                    module_catalogs.update(sub_catalogs)
         if unique_modules:
             # Legacy HTML recon stays as the Phase A safety net. Both paths run
             # in the same Playwright session-equivalent: same login, same URLs.

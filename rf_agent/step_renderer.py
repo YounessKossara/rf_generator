@@ -125,7 +125,7 @@ def _render_step(step: dict, selectors: dict, navs: dict,
         if kw == "click":
             return f"{INDENT}Smart Click    {label}    {role}    {sel}"
         if kw == "input":
-            value = step.get("value", "")
+            value = step.get("value", "") or "${EMPTY}"
             return f"{INDENT}Smart Input    {label}    {role}    {sel}    {value}"
         if kw == "select":
             value = step.get("value", "")
