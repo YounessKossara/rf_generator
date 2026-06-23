@@ -244,16 +244,18 @@ async def generate_rf(req: RFRequest):
     return {**gen_data, **exec_data}
 
 
+from fastapi.responses import FileResponse, RedirectResponse
+
 @app.get("/api/report/{test_name}")
 async def get_report(test_name: str):
-    """Serve the HTML report file."""
+    """Redirect to the static HTML report file so relative links (logs, screenshots) work."""
     safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in test_name)
     report_path = Path(f"output/rf_reports/{safe_name}/report.html")
 
     if not report_path.exists():
         raise HTTPException(status_code=404, detail="Report not found")
 
-    return FileResponse(str(report_path), media_type="text/html")
+    return RedirectResponse(url=f"/output/rf_reports/{safe_name}/report.html")
 
 
 @app.get("/api/log/{test_name}")
