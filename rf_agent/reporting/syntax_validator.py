@@ -5,7 +5,7 @@ Validates Robot Framework syntax and uses LLM to fix errors.
 """
 
 import re
-from tools.llm import get_smart_llm, invoke_with_retry
+from rf_agent.infrastructure.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
 
 

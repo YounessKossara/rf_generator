@@ -10,9 +10,9 @@ this module automatically:
 """
 
 import re
-from tools.llm import get_smart_llm, invoke_with_retry
+from rf_agent.infrastructure.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
-from rf_agent.app_memory import rf_to_playwright
+from rf_agent.app_memory import rf_to_playwright, _extract_interactive_elements
 
 try:
     from playwright.async_api import async_playwright
@@ -78,12 +78,22 @@ def _needs_login(tc_rf_code: str, success_indicator: str = "") -> bool:
 
 def _extract_credentials_from_rf(tc_rf_code: str) -> tuple:
     """
-    Extract username/password from Input Text lines by examining the selector.
+    Extract username/password from the test case body.
 
-    Uses selector keywords to determine which field is username vs password:
-      - Selectors with 'user', 'email', 'login', 'username' → username field
-      - Selectors with 'password', 'pass', 'pwd', 'secret' → password field
+    Priority order:
+      1. `Open App And Login    <user>    <pass>`  (current architecture)
+      2. `Input Text` selectors with user/password keywords (legacy / direct logins)
     """
+    # ── Priority 1: parse the Open App And Login keyword call ──
+    for line in tc_rf_code.split("\n"):
+        m = re.match(
+            r'^\s*Open App And Login\s+(\S+)\s+(\S+)\s*$',
+            line, re.IGNORECASE,
+        )
+        if m:
+            return m.group(1), m.group(2)
+
+    # ── Priority 2: legacy Input Text scraping ──
     username = None
     password = None
 
@@ -92,7 +102,6 @@ def _extract_credentials_from_rf(tc_rf_code: str) -> tuple:
         if not stripped.lower().startswith("input text"):
             continue
 
-        # Split on 2+ spaces (RF separator)
         parts = re.split(r'\s{2,}', stripped)
         if len(parts) < 3:
             continue
@@ -100,41 +109,74 @@ def _extract_credentials_from_rf(tc_rf_code: str) -> tuple:
         selector = parts[1].lower()
         value = parts[2].strip()
 
-        # Determine which credential this is based on selector content
         if any(kw in selector for kw in ["username", "user", "email", "login", "userid", "user_name"]):
             username = value
         elif any(kw in selector for kw in ["password", "pass", "pwd", "secret"]):
             password = value
 
-    # Fallback to empty strings if not found (healer will try to log in, may fail gracefully)
     return username or "", password or ""
 
 
 def _extract_target_url(tc_rf_code: str) -> str:
-    """Extract the target page URL from Go To / Navigate To keywords in TC code."""
+    """
+    Extract the LAST navigation URL referenced by the test body. This is the
+    page where the failure most likely occurred (so the healer should fetch its
+    DOM, not the dashboard's).
+    """
+    last = ""
     for line in tc_rf_code.split("\n"):
         stripped = line.strip()
         lower = stripped.lower()
-        if lower.startswith("go to") or lower.startswith("navigate to"):
-            parts = stripped.split(None, 2)
-            if len(parts) >= 3:
-                return parts[-1]
-            elif len(parts) >= 2:
-                return parts[-1]
-    return ""
+        if lower.startswith("go to") or lower.startswith("navigate to") or lower.startswith("go back"):
+            parts = re.split(r'\s{2,}', stripped, maxsplit=1)
+            if len(parts) < 2:
+                parts = stripped.split(None, 2)
+            if len(parts) >= 2:
+                last = parts[-1].strip()
+    return last
+
+
+def _extract_all_navigation_urls(tc_rf_code: str) -> list:
+    """All navigation URLs in the order they appear — replay these on heal.
+
+    Resolves ${BASE_URL} from the test's Variables section so the healer can
+    actually hit the page where the test failed instead of handing literal
+    '${BASE_URL}/...' to Playwright.
+    """
+    base_url = extract_base_url_from_rf_code(tc_rf_code)
+    urls = []
+    for line in tc_rf_code.split("\n"):
+        stripped = line.strip()
+        m = re.match(r'^(?:Go\s+To|Navigate\s+To)\s+(\S+)', stripped, re.IGNORECASE)
+        if m:
+            raw = m.group(1).strip()
+            if base_url and "${BASE_URL}" in raw:
+                raw = raw.replace("${BASE_URL}", base_url)
+            urls.append(raw)
+    return urls
 
 
 async def fetch_page_html(url: str, needs_login: bool = False,
                           username: str = "",
                           password: str = "",
                           target_url: str = "",
-                          login_recipe: dict = None) -> str:
+                          login_recipe: dict = None,
+                          nav_urls: list = None) -> str:
     """
-    Fetch real DOM HTML using Playwright (headless Chrome).
-    If needs_login=True, performs login first using the provided credentials.
-    Uses login_recipe selectors if provided, otherwise falls back to generic selectors.
-    If target_url is set, navigates there after login to get the correct page DOM.
+    JIT live-DOM capture for the healer.
+
+    Logs in (best-effort) using the provided recipe, replays every navigation
+    URL in `nav_urls` (or just `target_url` for backwards compat), and returns
+    the compact interactive-element extract of the FINAL page — i.e. the DOM
+    of the page where the test actually failed, NOT the dashboard.
+
+    Returns plain HTML on Playwright failure (httpx fallback) so the LLM still
+    has SOMETHING to work from.
     """
+    nav_urls = list(nav_urls) if nav_urls else []
+    if target_url and target_url not in nav_urls:
+        nav_urls.append(target_url)
+
     if HAS_PLAYWRIGHT:
         try:
             async with async_playwright() as p:
@@ -153,7 +195,6 @@ async def fetch_page_html(url: str, needs_login: bool = False,
                         pwd_sel = rf_to_playwright(recipe.get("password_selector", "")) if recipe.get("password_selector") else ""
                         btn_sel = rf_to_playwright(recipe.get("submit_selector", "")) if recipe.get("submit_selector") else ""
 
-                        # Fallback if recipe selectors not available
                         if not usr_sel:
                             usr_sel = "input[type='text'], input[placeholder*='user' i], input[placeholder*='email' i]"
                         if not pwd_sel:
@@ -169,22 +210,43 @@ async def fetch_page_html(url: str, needs_login: bool = False,
                             await usr.fill(username)
                             await pwd.fill(password)
                             if await btn.count() > 0:
+                                pre_url = page.url
                                 await btn.click()
                                 await page.wait_for_timeout(3000)
-                                print("   ✅ [HEALER] Logged in")
-
-                                # Navigate to target page if specified
-                                if target_url:
-                                    print(f"   🔗 [HEALER] Navigating to {target_url}")
-                                    await page.goto(target_url, timeout=15000, wait_until="networkidle")
-                                    await page.wait_for_timeout(2000)
-                                    print("   ✅ [HEALER] Target page loaded")
+                                # Sanity: did login actually succeed?
+                                try:
+                                    still_pwd = await page.locator("input[type='password']").count() > 0
+                                except Exception:
+                                    still_pwd = False
+                                url_changed = page.url.rstrip("/") != pre_url.rstrip("/")
+                                if url_changed or not still_pwd:
+                                    print(f"   ✅ [HEALER] Logged in — at {page.url}")
+                                else:
+                                    print(f"   ⚠️  [HEALER] Login appears FAILED — "
+                                          f"DOM will be the login page.")
                     except Exception as login_err:
                         print(f"   ⚠️  [HEALER] Login attempt failed: {login_err}")
 
-                html = await page.content()
+                # Replay every navigation URL the failing test goes through.
+                # The DOM we capture afterwards is the page where the failure
+                # most likely occurred — NOT the dashboard.
+                for nav_url in nav_urls:
+                    try:
+                        print(f"   🔗 [HEALER] Replaying navigation to {nav_url}")
+                        await page.goto(nav_url, timeout=20000, wait_until="networkidle")
+                        await page.wait_for_timeout(2000)
+                    except Exception as nav_err:
+                        print(f"   ⚠️  [HEALER] Navigation to {nav_url} failed: {nav_err}")
+
+                if nav_urls:
+                    print(f"   📍 [HEALER] Capturing DOM at {page.url}")
+
+                full_html = await page.content()
                 await browser.close()
-                return html[:4000]
+                # Use the same compact-element extractor as the generator so
+                # the LLM sees buttons/inputs/headings rather than raw markup.
+                compact = _extract_interactive_elements(full_html)
+                return compact or full_html[:4000]
         except Exception as e:
             print(f"   ⚠️  Playwright fetch failed: {e}, falling back to httpx")
 
