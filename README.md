@@ -319,7 +319,7 @@ The supervisor bot reports live agent status. Commands `/status`, `/approve <tas
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/rf_generator.git
+git clone https://github.com/YounessKossara/rf_generator.git
 cd rf_generator
 
 # 2. Create virtual environment
