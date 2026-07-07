@@ -225,37 +225,91 @@ Key rotation is **automatic**: if a Groq API key hits a rate limit or auth error
 
 ## Screenshots
 
-### OmniPlatform — Task Board (OmniPlatform)
+### Dashboard — Agents online
 
-The Kanban board shows all tasks flowing through the pipeline. Tasks move from **Commentaire → En cours → Révision → Révision qualité → Terminé**. `rf_agent` and `test_agent` tasks are visible with their status and execution results.
+All four agents registered and live in OmniPlatform. Green status confirms heartbeat is active.
 
-![Task Board](docs/screenshots/task_board.png)
+![Dashboard agents online](docs/screenshots/dashbord_agents_online.png)
+
+---
+
+### Task Board (Kanban)
+
+Tasks flow automatically through **Commentaire → En cours → Révision → Révision qualité → Terminé**. Each card shows which agent processed it, priority, and elapsed time.
+
+![Kanban](docs/screenshots/kanban.png)
+
+---
+
+### Agent Activity
+
+Real-time feed of every action taken by every agent — generation steps, execution results, healing attempts, handoffs.
+
+![Agent Activity](docs/screenshots/agents_activity.png)
+
+---
+
+### Agent Logs
+
+Full execution logs per agent, including LLM calls, Robot Framework output, and self-healing traces.
+
+![Agent Logs](docs/screenshots/agents_log.png)
+
+---
+
+### Agent Output
+
+Structured output panel showing generated `.robot` files, test results, and healing summaries produced by `rf_agent`.
+
+![Agent Output](docs/screenshots/output_agents.png)
+
+---
+
+### Agent Bureau
+
+The agent workspace view showing task details, assigned inputs, and execution context.
+
+![Agent Bureau](docs/screenshots/agents_bureau.png)
+
+---
+
+### Cost Tracking
+
+Token usage and API cost monitoring per agent and per task — useful for optimizing LLM calls.
+
+![Cost Tracking](docs/screenshots/agents_cost.png)
+
+---
+
+### System Monitor
+
+Real-time system resource monitoring: CPU usage, memory, disk, GPU, network I/O, and top processes.
+
+![System Monitor](docs/screenshots/agents_monitoring.png)
+
+---
+
+### GitHub Issues Sync
+
+GitHub Issues can be imported as tasks and assigned directly to an agent (`rf_agent`, `test_agent`, `use_cases_agent`, `user_story_agent`). Bidirectional sync links tasks back to their source issue.
+
+![GitHub Issues Sync](docs/screenshots/github_issues.png)
+
+---
+
+### Users Management
+
+Role-based access control for the OmniPlatform dashboard. Admins can add users and manage permissions.
+
+![Users Management](docs/screenshots/users_management.png)
 
 ---
 
 ### OmniAgentSupervisor — Telegram Bot
 
-The supervisor bot reports live agent status. All four agents (`userstoryagent`, `testagent`, `rfagent`, `usecasesagent`) are shown with their connection state. Commands `/status`, `/approve`, `/retry` are available directly from Telegram.
+The supervisor bot reports live agent status. Commands `/status`, `/approve <task_id>`, `/retry <task_id>` are available directly from Telegram — no need to open the dashboard.
 
-![Telegram Bot](docs/screenshots/telegram_bot.png)
-
----
-
-### OmniPlatform — System Monitor
-
-Real-time system resource monitoring integrated in OmniPlatform: CPU usage, memory, disk, GPU, network I/O, and top processes.
-
-![System Monitor](docs/screenshots/system_monitor.png)
-
----
-
-### OmniPlatform — GitHub Issues Sync
-
-GitHub Issues can be imported as tasks and assigned directly to an agent (`rf_agent`, `test_agent`, `use_cases_agent`, `user_story_agent`). Bidirectional sync links tasks back to their source issue.
-
-![GitHub Sync](docs/screenshots/github_sync.png)
-
-> **Note:** Add screenshots to `docs/screenshots/` to populate the images above.
+![Telegram Bot](docs/screenshots/telegram_bot.jpeg)
 
 ---
 
