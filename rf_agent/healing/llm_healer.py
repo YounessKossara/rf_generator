@@ -10,7 +10,7 @@ this module automatically:
 """
 
 import re
-from tools.llm import get_smart_llm, invoke_with_retry
+from rf_agent.infrastructure.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
 from rf_agent.app_memory import rf_to_playwright, _extract_interactive_elements
 

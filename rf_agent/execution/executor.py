@@ -15,7 +15,7 @@ try:
 except ImportError:
     ET = None
 
-from rf_agent.self_healer import (
+from rf_agent.healing.llm_healer import (
     is_healable_error,
     fetch_page_html,
     heal_test_case,
