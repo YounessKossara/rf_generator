@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(.venv\\\\Scripts\\\\python.exe -m py_compile rf_agent/rf_generator.py)",
-      "Bash(python -c ' *)",
-      "Bash(ls -la \"C:\\\\Users\\\\youne\\\\Downloads\\\\screens for report\\\\\" 2>&1 | head -30)"
-    ]
-  }
-}

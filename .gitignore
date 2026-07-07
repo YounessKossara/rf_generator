@@ -18,6 +18,15 @@ __pycache__/
 output/
 reports/*.docx
 
+# Robot Framework outputs (root-level from direct robot run)
+log.html
+report.html
+output.xml
+
+# Claude Code (machine-specific)
+.claude/settings.local.json
+.claude/worktrees/
+
 # Outils de système d'exploitation
 .DS_Store
 Thumbs.db
