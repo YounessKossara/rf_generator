@@ -40,7 +40,7 @@ def get_smart_llm():
         return ChatOpenAI(
             api_key=os.getenv("CEREBRAS_API_KEY"),
             base_url="https://api.cerebras.ai/v1",
-            model="llama3.1-8b",
+            model="gpt-oss-120b",
             temperature=0.1,
         )
     return ChatGroq(
