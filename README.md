@@ -28,7 +28,7 @@
 
 It is designed to operate both:
 - **Standalone** — via REST API or direct Python call
-- **In pipeline** — integrated into OmniPlatform, where it receives tasks from Mission Control and processes them autonomously
+- **In pipeline** — integrated into OmniPlatform, where it receives tasks from OmniPlatform and processes them autonomously
 
 The agent is capable of:
 
@@ -41,7 +41,7 @@ The agent is capable of:
 | **Self-healing (L1)** | Browser-side JavaScript corrections (no LLM, instant) |
 | **Self-healing (L2)** | LLM-based: re-fetches live DOM, sends error + HTML to the LLM, replaces the broken test case |
 | **Report generation** | HTML/log report from Robot Framework + optional `.docx` export |
-| **Platform integration** | Heartbeat, status, task handoff via Mission Control REST API |
+| **Platform integration** | Heartbeat, status, task handoff via OmniPlatform REST API |
 | **Telegram notifications** | Task status updates via OmniAgentSupervisor bot |
 
 ---
@@ -82,7 +82,7 @@ OmniPlatform is a **multi-agent SDLC system** where each agent handles one phase
                                           │
                                           ▼
                                ┌──────────────────────┐
-                               │   Mission Control     │
+                               │   OmniPlatform     │
                                │   (task → review)     │
                                │   .robot file sync    │
                                │   to agent memory     │
@@ -104,7 +104,7 @@ OmniPlatform is a **multi-agent SDLC system** where each agent handles one phase
 | `use_cases_agent` | Python + Playwright + LLM | Crawls the target application, generates detailed markdown test scenarios |
 | `test_agent` | Python + Playwright + LLM | Executes automated Playwright E2E tests from the markdown plan |
 | **`rf_agent`** | **Python + Robot Framework + LLM** | **Generates, executes, and self-heals Robot Framework tests** |
-| `mission_control` | Next.js (TypeScript) | Orchestrates all agents: task queue, memory, monitoring, GitHub sync, Telegram bot |
+| `omniplatform` | Next.js (TypeScript) | Orchestrates all agents: task queue, memory, monitoring, GitHub sync, Telegram bot |
 
 ---
 
@@ -186,7 +186,7 @@ POST /api/execute-rf
    merge results (no full re-run)
          │
          ▼
-   complete_task() → Mission Control
+   complete_task() → OmniPlatform
    upload_to_agent_memory() → .robot file synced
 ```
 
@@ -221,7 +221,7 @@ Key rotation is **automatic**: if a Groq API key hits a rate limit or auth error
 
 ## Screenshots
 
-### OmniPlatform — Task Board (Mission Control)
+### OmniPlatform — Task Board (OmniPlatform)
 
 The Kanban board shows all tasks flowing through the pipeline. Tasks move from **Commentaire → En cours → Révision → Révision qualité → Terminé**. `rf_agent` and `test_agent` tasks are visible with their status and execution results.
 
@@ -237,7 +237,7 @@ The supervisor bot reports live agent status. All four agents (`userstoryagent`,
 
 ---
 
-### Mission Control — System Monitor
+### OmniPlatform — System Monitor
 
 Real-time system resource monitoring integrated in OmniPlatform: CPU usage, memory, disk, GPU, network I/O, and top processes.
 
@@ -245,7 +245,7 @@ Real-time system resource monitoring integrated in OmniPlatform: CPU usage, memo
 
 ---
 
-### Mission Control — GitHub Issues Sync
+### OmniPlatform — GitHub Issues Sync
 
 GitHub Issues can be imported as tasks and assigned directly to an agent (`rf_agent`, `test_agent`, `use_cases_agent`, `user_story_agent`). Bidirectional sync links tasks back to their source issue.
 
@@ -257,7 +257,7 @@ GitHub Issues can be imported as tasks and assigned directly to an agent (`rf_ag
 
 ## Setup
 
-**Prerequisites:** Python 3.10+, Node.js (for Mission Control), a Groq API key (free tier), Playwright Chromium.
+**Prerequisites:** Python 3.10+, Node.js (for OmniPlatform), a Groq API key (free tier), Playwright Chromium.
 
 ```bash
 # 1. Clone
@@ -300,9 +300,9 @@ Copy `.env.example` to `.env` and fill in your values:
 | `TRELLO_API_KEY` | No | Post failure cards to a Trello board |
 | `TRELLO_TOKEN` | No | Trello token |
 | `TRELLO_BOARD_ID` | No | Target Trello board ID |
-| `MC_BASE_URL` | No | Mission Control URL (default: `http://localhost:3000`) |
-| `MC_AGENT_NAME` | No | Name registered in Mission Control (default: `rf_agent`) |
-| `MC_API_KEY` | No | Mission Control authentication token |
+| `MC_BASE_URL` | No | OmniPlatform URL (default: `http://localhost:3000`) |
+| `MC_AGENT_NAME` | No | Name registered in OmniPlatform (default: `rf_agent`) |
+| `MC_API_KEY` | No | OmniPlatform authentication token |
 | `RF_USE_CACHE` | No | Set to `1` to skip re-crawling already-known apps |
 
 ---
@@ -321,11 +321,11 @@ python -m uvicorn rf_agent.api.server:app --port 8001 --reload
 Open **http://localhost:8001** for the web UI.
 
 The agent automatically:
-- Registers itself with Mission Control on startup (if `MC_BASE_URL` is set)
+- Registers itself with OmniPlatform on startup (if `MC_BASE_URL` is set)
 - Starts a heartbeat loop (every 30 s) to receive pipeline tasks
 - Processes incoming tasks autonomously without user input
 
-To run in standalone mode (no Mission Control), simply leave `MC_BASE_URL` unset. The agent will still serve the REST API.
+To run in standalone mode (no OmniPlatform), simply leave `MC_BASE_URL` unset. The agent will still serve the REST API.
 
 ---
 
@@ -564,9 +564,9 @@ A first level of healing (L1) uses browser-side JavaScript to try quick correcti
 
 Crawling a full application DOM with Playwright takes tens of seconds. The `discovery/cache.py` module persists the discovered login recipe, module structure, and element catalogs to `output/app_memory.json`. On subsequent runs against the same base URL, the agent reuses the cache (`RF_USE_CACHE=1`), making generation near-instant for known apps.
 
-### Mission Control integration — heartbeat pattern
+### OmniPlatform integration — heartbeat pattern
 
-The agent does not require a persistent WebSocket connection to Mission Control. Instead, it sends a heartbeat POST every 30 seconds. The response carries any `assigned_tasks` for this agent. This design means:
+The agent does not require a persistent WebSocket connection to OmniPlatform. Instead, it sends a heartbeat POST every 30 seconds. The response carries any `assigned_tasks` for this agent. This design means:
 - The agent can restart independently without losing tasks (MC holds the queue)
 - Network failures between agent and MC are non-fatal (next heartbeat picks up)
 - The agent can run in standalone mode with zero changes when MC is absent
@@ -583,10 +583,10 @@ The agent does not require a persistent WebSocket connection to Mission Control.
 | LLM framework | [LangChain](https://www.langchain.com/) | Message formatting, model abstraction |
 | Browser automation | [Playwright](https://playwright.dev/) (Python) | DOM discovery, login replay, healing fetch |
 | Test runner | [Robot Framework](https://robotframework.org/) | Test execution, output.xml generation |
-| HTTP client | [httpx](https://www.python-httpx.org/) | Mission Control comms, static HTML fetching |
+| HTTP client | [httpx](https://www.python-httpx.org/) | OmniPlatform comms, static HTML fetching |
 | Report export | [python-docx](https://python-docx.readthedocs.io/) | `.docx` test reports |
 | Config | [python-dotenv](https://pypi.org/project/python-dotenv/) | `.env` loading |
-| Platform | OmniPlatform (Mission Control) | Task orchestration, Telegram bot, agent registry |
+| Platform | OmniPlatform (OmniPlatform) | Task orchestration, Telegram bot, agent registry |
 
 ---
 
