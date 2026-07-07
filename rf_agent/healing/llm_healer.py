@@ -12,7 +12,7 @@ this module automatically:
 import re
 from rf_agent.infrastructure.llm import get_smart_llm, invoke_with_retry
 from langchain.messages import SystemMessage, HumanMessage
-from rf_agent.app_memory import rf_to_playwright, _extract_interactive_elements
+from rf_agent.discovery.utils import rf_to_playwright, _extract_interactive_elements
 
 try:
     from playwright.async_api import async_playwright

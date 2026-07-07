@@ -7,10 +7,10 @@ batch generation (Phase B fallback).
 import re as _re
 from langchain.messages import SystemMessage, HumanMessage
 from rf_agent.infrastructure.llm import get_smart_llm, invoke_with_retry
-from rf_agent.app_memory import (load_app_for_generation, save_app,
-                                  discover_page_structure,
-                                  discover_modules_batch, discover_catalogs_batch,
-                                  cache_enabled)
+from rf_agent.discovery.cache import load_app_for_generation, save_app, cache_enabled
+from rf_agent.discovery.page_structure import discover_page_structure
+from rf_agent.discovery.modules import discover_modules_batch
+from rf_agent.discovery.catalogs import discover_catalogs_batch
 from rf_agent.rendering.step_renderer import merge_catalogs
 from rf_agent.generation.header_builder import _build_header
 from rf_agent.generation.credential_extractor import _extract_default_credentials

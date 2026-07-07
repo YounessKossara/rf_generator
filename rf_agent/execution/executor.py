@@ -28,7 +28,7 @@ from rf_agent.healing.llm_healer import (
     _extract_target_url,
     _extract_all_navigation_urls,
 )
-from rf_agent.app_memory import load_app
+from rf_agent.discovery.cache import load_app
 
 MAX_HEAL_ATTEMPTS = 3
 

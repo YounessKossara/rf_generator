@@ -10,7 +10,7 @@ from fastapi.routing import APIRouter
 from pydantic import BaseModel
 
 from rf_agent.parsing.md_parser import parse_md
-from rf_agent.rf_generator import generate_rf_code
+from rf_agent.generation.orchestrator import generate_rf_code
 from rf_agent.reporting.syntax_validator import validate_rf_syntax
 from rf_agent.platform.mission_control import update_status
 

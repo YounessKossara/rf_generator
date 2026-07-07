@@ -461,7 +461,7 @@ def extract_catalog_from_url_sync(base_url: str, post_login_steps=None,
 
                 # Optional login
                 if username and password and recipe:
-                    from rf_agent.app_memory import rf_to_playwright
+                    from rf_agent.discovery.utils import rf_to_playwright
                     usr_sel = rf_to_playwright(recipe.get("username_selector", "")) or "input[type='text']"
                     pwd_sel = rf_to_playwright(recipe.get("password_selector", "")) or "input[type='password']"
                     btn_sel = rf_to_playwright(recipe.get("submit_selector", "")) or "button[type='submit']"
