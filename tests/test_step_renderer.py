@@ -1,5 +1,5 @@
 """
-Tests unitaires pour rf_agent/step_renderer.py
+Tests unitaires pour rf_agent/rendering/step_renderer.py
 
 Couvre :
 - Plan valide → code Robot Framework correct
@@ -12,7 +12,7 @@ Couvre :
 """
 
 import pytest
-from rf_agent.step_renderer import render_robot_test, UnknownIdError
+from rf_agent.rendering.step_renderer import render_robot_test, UnknownIdError
 
 
 # ── Fixtures ────────────────────────────────────────────────────────────────

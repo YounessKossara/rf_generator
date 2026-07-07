@@ -20,7 +20,7 @@ load_dotenv()
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-from rf_agent.rf_executor import execute_rf
+from rf_agent.execution.executor import execute_rf
 
 
 def main() -> int:

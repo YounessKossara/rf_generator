@@ -1,5 +1,5 @@
 """
-Tests unitaires pour rf_agent/md_parser.py
+Tests unitaires pour rf_agent/parsing/md_parser.py
 
 Couvre :
 - Extraction d'un TC avec liste numérotée (français)
@@ -11,7 +11,7 @@ Couvre :
 """
 
 import pytest
-from rf_agent.md_parser import parse_md
+from rf_agent.parsing.md_parser import parse_md
 
 
 # ── Fixtures ────────────────────────────────────────────────────────────────
