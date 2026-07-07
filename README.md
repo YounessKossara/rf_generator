@@ -26,9 +26,13 @@
 
 **RF Generator** is an autonomous agent that converts a structured markdown test plan into a fully executable [Robot Framework](https://robotframework.org/) `.robot` test suite, runs it against a live application, and **automatically heals selector failures** without human intervention.
 
-It is designed to operate both:
-- **Standalone** — via REST API or direct Python call
-- **In pipeline** — integrated into OmniPlatform, where it receives tasks from OmniPlatform and processes them autonomously
+It is designed to operate in two modes:
+
+### Standalone mode — this repo is self-contained
+Clone this repo, start the server, open **http://localhost:8001** — the built-in frontend lets you paste a markdown test plan, generate the `.robot` file, execute it, and read the results. **No other component needed.**
+
+### Pipeline mode — optional OmniPlatform integration
+When connected to OmniPlatform (the multi-agent orchestrator), the agent registers itself, receives tasks automatically from the pipeline, and reports back without any human interaction. OmniPlatform is a separate project; its absence does not affect standalone usage in any way.
 
 The agent is capable of:
 
